@@ -1,6 +1,9 @@
-import './assets/main.css'
+import { Plugin } from 'obsidian'
 
-import { createApp } from 'vue'
-import App from './App.vue'
+export default class MemoPlugin extends Plugin {
+  async onload() {
+    console.log('Hi from memo plugin!')
+  }
 
-createApp(App).mount('#app')
+  onunload() {}
+}

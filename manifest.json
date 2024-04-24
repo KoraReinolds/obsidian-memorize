@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-memorize",
+  "name": "Memorize",
+  "version": "0.0.1",
+  "minAppVersion": "0.15.0",
+  "description": "Allow you to quickly memorize anything",
+  "author": "Kora",
+  "authorUrl": "https://github.com/KoraReinolds",
+  "isDesktopOnly": false
+}
