@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "rollup-plugin-rename": "^1.0.1",
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",
+    "yaml": "^2.4.5"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
