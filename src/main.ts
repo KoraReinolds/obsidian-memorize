@@ -1,17 +1,19 @@
 import { Plugin } from 'obsidian'
-import { parse, stringify } from 'yaml'
+import { parse } from 'yaml'
 import { isCodeBlockSettings } from './settings/types'
+import { getAllFiles } from './files'
 
 export default class MemoPlugin extends Plugin {
   async onload() {
     console.log('Hi from memo plugin!')
 
     this.registerMarkdownCodeBlockProcessor('memo', (source, el, ctx) => {
-      console.log(stringify({ number: 3, plain: { block: 'two\nlines\n' } }))
       try {
         const settings = parse(source)
         if (isCodeBlockSettings(settings)) {
-          el.innerHTML = JSON.stringify(settings)
+          const folder = this.app.vault.getAbstractFileByPath(settings.rootFolder)
+          const files = getAllFiles(folder)
+          el.innerHTML = `files: ${files.length}`
         } else {
           throw new Error('Not valid settings')
         }
