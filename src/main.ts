@@ -1,6 +1,9 @@
 import { Plugin } from 'obsidian'
 import { parse } from 'yaml'
-import { isCodeBlockSettings } from './settings/types'
+import {
+  isCodeBlockSettings,
+  type ICodeBlockSettings
+} from './settings/types'
 import {
   filterFilesByTag,
   getAllFiles,
@@ -8,6 +11,16 @@ import {
 } from './files'
 
 export default class MemoPlugin extends Plugin {
+  settings: ICodeBlockSettings = {
+    rootFolder: '',
+    association: {
+      tag: ''
+    },
+    suggestion: {
+      tag: ''
+    }
+  }
+
   async onload() {
     console.log('Hi from memo plugin!')
 
@@ -16,7 +29,10 @@ export default class MemoPlugin extends Plugin {
       (source, el, ctx) => {
         try {
           const settings = parse(source)
+
           if (isCodeBlockSettings(settings)) {
+            this.settings = settings
+
             const folder =
               this.app.vault.getAbstractFileByPath(
                 settings.rootFolder
