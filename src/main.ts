@@ -4,11 +4,7 @@ import {
   isCodeBlockSettings,
   type ICodeBlockSettings
 } from './settings/types'
-import {
-  filterFilesByTag,
-  getAllFiles,
-  getFilesLinks
-} from './files'
+import { MemoApp } from './app'
 
 export default class MemoPlugin extends Plugin {
   settings: ICodeBlockSettings = {
@@ -20,6 +16,7 @@ export default class MemoPlugin extends Plugin {
       tag: ''
     }
   }
+  memo: MemoApp | null = null
 
   async onload() {
     console.log('Hi from memo plugin!')
@@ -32,32 +29,8 @@ export default class MemoPlugin extends Plugin {
 
           if (isCodeBlockSettings(settings)) {
             this.settings = settings
-
-            const folder =
-              this.app.vault.getAbstractFileByPath(
-                settings.rootFolder
-              )
-
-            const files = getAllFiles(folder)
-
-            const associations = filterFilesByTag(
-              this.app,
-              files,
-              settings.association.tag
-            )
-
-            const associationLinks = getFilesLinks(
-              this.app,
-              associations
-            )
-
-            const suggestions = filterFilesByTag(
-              this.app,
-              files,
-              settings.suggestion.tag
-            ).filter((file) =>
-              associationLinks.has(file.basename)
-            )
+            this.memo = new MemoApp(this)
+            this.memo.init()
           } else {
             throw new Error('Not valid settings')
           }
