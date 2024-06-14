@@ -8,7 +8,9 @@ export interface ICodeBlockSettings {
   }
 }
 
-export const isCodeBlockSettings = (obj: any): obj is ICodeBlockSettings => {
+export const isCodeBlockSettings = (
+  obj: any
+): obj is ICodeBlockSettings => {
   return (
     obj &&
     obj.rootFolder &&
