@@ -57,10 +57,20 @@ export const getFilesLinks = (
 ): TLinks =>
   new Set(
     files
-      .map((file) => getMetadata(app, file)?.links || [])
+      .map((file) => {
+        const meta = getMetadata(app, file)
+        if (!meta) return []
+        const { links, frontmatterLinks } = meta
+        return [
+          ...(links || []).map((l) => l.link),
+          ...(frontmatterLinks || []).map((l) => l.link)
+        ]
+      })
       .flat()
-      .map((link) => link.link)
   )
 
-export const getRandomFile = (files: TFile[]) =>
-  files[getRandomValueBetween(0, files.length - 1)]
+export const getRandomFile = (files: TFile[]) => {
+  return files.length
+    ? files[getRandomValueBetween(0, files.length - 1)]
+    : null
+}
