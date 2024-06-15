@@ -9,6 +9,7 @@ export interface IList {
   item: TFile | null
 
   render(): void
+  next(): void
   getAll(): TFile[]
-  getItem(): TFile
+  getItem(): TFile | null
 }

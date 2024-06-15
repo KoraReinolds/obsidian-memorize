@@ -4,6 +4,8 @@ import {
   TFile,
   TFolder
 } from 'obsidian'
+import type { TLinks } from './types'
+import { getRandomValueBetween } from '@/lib'
 
 const isFile = (file: any): file is TFile =>
   file instanceof TFile
@@ -43,13 +45,22 @@ export const filterFilesByTag = (
     )
   )
 
+export const filterFilesByLinks = (
+  files: TFile[],
+  links: TLinks = new Set()
+): TFile[] =>
+  files.filter((file) => links.has(file.basename))
+
 export const getFilesLinks = (
   app: App,
   files: TFile[]
-): Set<string> =>
+): TLinks =>
   new Set(
     files
       .map((file) => getMetadata(app, file)?.links || [])
       .flat()
       .map((link) => link.link)
   )
+
+export const getRandomFile = (files: TFile[]) =>
+  files[getRandomValueBetween(0, files.length - 1)]

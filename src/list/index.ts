@@ -6,12 +6,15 @@ import { getFilesLinks } from '@/files'
 export abstract class AList implements IList {
   files: TFile[]
   plugin: MemoPlugin
-  item: TFile | null
+  item: TFile | null = null
   abstract filteredFiles: TFile[]
 
   constructor(plugin: MemoPlugin) {
     this.plugin = plugin
     this.files = this.getAll()
+  }
+
+  next(): void {
     this.item = this.getItem()
   }
 
@@ -19,7 +22,7 @@ export abstract class AList implements IList {
     return getFilesLinks(this.plugin.app, this.files)
   }
 
-  abstract getItem(): TFile
+  abstract getItem(): TFile | null
 
   abstract render(): void
 

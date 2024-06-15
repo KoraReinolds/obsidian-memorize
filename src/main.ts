@@ -32,6 +32,7 @@ export default class MemoPlugin extends Plugin {
             this.settings = settings
             this.memo = new MemoApp(this)
             this.memo.init()
+            this.memo.next()
             console.log(this.memo)
           } else {
             throw new Error('Not valid settings')

@@ -23,6 +23,7 @@ export class MemoApp implements IMemoApp {
   }
 
   next(): void {
-    throw new Error('Method not implemented.')
+    this.associations?.next()
+    this.suggestions?.next()
   }
 }
