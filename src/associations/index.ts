@@ -9,9 +9,20 @@ export class Associations extends AList {
     super(plugin)
   }
 
+  get filteredFiles(): TFile[] {
+    return this.files.filter((file) =>
+      this.plugin.memo?.suggestions?.links.has(
+        file.basename
+      )
+    )
+  }
+
   getItem(): TFile {
-    return this.list[
-      getRandomValueBetween(0, this.list.length - 1)
+    return this.filteredFiles[
+      getRandomValueBetween(
+        0,
+        this.filteredFiles.length - 1
+      )
     ]
   }
 

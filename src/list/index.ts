@@ -4,29 +4,24 @@ import type MemoPlugin from '@/main'
 import { getFilesLinks } from '@/files'
 
 export abstract class AList implements IList {
-  list: TFile[]
+  files: TFile[]
   plugin: MemoPlugin
   item: TFile | null
+  abstract filteredFiles: TFile[]
 
   constructor(plugin: MemoPlugin) {
     this.plugin = plugin
-    this.list = this.getAll()
+    this.files = this.getAll()
     this.item = this.getItem()
   }
 
   get links() {
-    return getFilesLinks(this.plugin.app, this.list)
+    return getFilesLinks(this.plugin.app, this.files)
   }
 
-  getItem(): TFile {
-    throw new Error('Method not implemented.')
-  }
+  abstract getItem(): TFile
 
-  render(): void {
-    throw new Error('Method not implemented.')
-  }
+  abstract render(): void
 
-  getAll(): TFile[] {
-    throw new Error('Method not implemented.')
-  }
+  abstract getAll(): TFile[]
 }

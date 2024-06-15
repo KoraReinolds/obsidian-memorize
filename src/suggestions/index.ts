@@ -6,11 +6,20 @@ import type { TFile } from 'obsidian'
 export class Suggestions extends AList {
   constructor(plugin: MemoPlugin) {
     super(plugin)
-    this.list = this.getAll()
+    this.files = this.getAll()
+  }
+
+  get filteredFiles(): TFile[] {
+    return this.files.filter((file) =>
+      this.plugin.memo?.associations?.links.has(
+        file.basename
+      )
+    )
   }
 
   getItem(): TFile {
-    throw new Error('Method not implemented.')
+    return this.files[0]
+    // throw new Error('Method not implemented.')
   }
 
   render(): void {
@@ -29,10 +38,6 @@ export class Suggestions extends AList {
       this.plugin.app,
       files,
       this.plugin.settings.suggestion.tag
-    ).filter((file) =>
-      this.plugin.memo?.associations?.links.has(
-        file.basename
-      )
     )
 
     return suggestions
