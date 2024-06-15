@@ -2,6 +2,7 @@ export interface ICodeBlockSettings {
   rootFolder: string
   association: {
     tag: string
+    mode: 'ramdom'
   }
   suggestion: {
     tag: string

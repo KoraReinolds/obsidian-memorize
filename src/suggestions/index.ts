@@ -9,6 +9,10 @@ export class Suggestions extends AList {
     this.list = this.getAll()
   }
 
+  getItem(): TFile {
+    throw new Error('Method not implemented.')
+  }
+
   render(): void {
     throw new Error('Method not implemented.')
   }

@@ -10,7 +10,8 @@ export default class MemoPlugin extends Plugin {
   settings: ICodeBlockSettings = {
     rootFolder: '',
     association: {
-      tag: ''
+      tag: '',
+      mode: 'ramdom'
     },
     suggestion: {
       tag: ''
@@ -31,6 +32,7 @@ export default class MemoPlugin extends Plugin {
             this.settings = settings
             this.memo = new MemoApp(this)
             this.memo.init()
+            console.log(this.memo)
           } else {
             throw new Error('Not valid settings')
           }

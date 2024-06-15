@@ -2,8 +2,7 @@ import {
   App,
   TAbstractFile,
   TFile,
-  TFolder,
-  type LinkCache
+  TFolder
 } from 'obsidian'
 
 const isFile = (file: any): file is TFile =>

@@ -1,4 +1,5 @@
 import { filterFilesByTag, getAllFiles } from '@/files'
+import { getRandomValueBetween } from '@/lib'
 import { AList } from '@/list'
 import type MemoPlugin from '@/main'
 import type { TFile } from 'obsidian'
@@ -6,6 +7,12 @@ import type { TFile } from 'obsidian'
 export class Associations extends AList {
   constructor(plugin: MemoPlugin) {
     super(plugin)
+  }
+
+  getItem(): TFile {
+    return this.list[
+      getRandomValueBetween(0, this.list.length - 1)
+    ]
   }
 
   render(): void {
