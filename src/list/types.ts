@@ -8,7 +8,7 @@ export interface IList {
   plugin: MemoPlugin
   item: TFile | null
 
-  render(): void
+  render(el: HTMLElement): void
   next(): void
   getAll(): TFile[]
   getItem(): TFile | null

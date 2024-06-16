@@ -26,4 +26,18 @@ export class MemoApp implements IMemoApp {
     this.associations?.next()
     this.suggestions?.next()
   }
+
+  render(el: HTMLElement): void {
+    el.innerHTML = ''
+    this.associations?.render(el)
+    const form = el.createEl('form')
+    this.suggestions?.render(form)
+    const nextBtn = form.createEl('button')
+    nextBtn.innerHTML = 'Next'
+    nextBtn.onclick = (e) => {
+      e.preventDefault()
+      this.next()
+      this.render(el)
+    }
+  }
 }

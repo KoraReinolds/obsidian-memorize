@@ -7,5 +7,6 @@ export interface IMemoApp {
   suggestions: IList | null
 
   check(): void
+  render(el: HTMLElement): void
   next(): void
 }

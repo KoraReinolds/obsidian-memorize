@@ -3,11 +3,11 @@ import {
   filterFilesByTag,
   getAllFiles,
   getFilesLinks,
+  getMetadata,
   getRandomFile
 } from '@/files'
 import { AList } from '@/list'
 import type MemoPlugin from '@/main'
-import type { TFile } from 'obsidian'
 
 export class Suggestions extends AList {
   constructor(plugin: MemoPlugin) {
@@ -15,19 +15,18 @@ export class Suggestions extends AList {
     this.files = this.getAll()
   }
 
-  get filteredFiles(): TFile[] {
+  get filteredFiles() {
     return filterFilesByLinks(
       this.files,
       this.plugin.memo?.associations?.links
     )
   }
 
-  getItem(): TFile | null {
+  getItem() {
     const association =
       this.plugin.memo?.associations?.item || null
 
     if (!association) return null
-
     const associationLinks = getFilesLinks(
       this.plugin.app,
       [association]
@@ -41,11 +40,13 @@ export class Suggestions extends AList {
     return getRandomFile(suggestions)
   }
 
-  render(): void {
-    throw new Error('Method not implemented.')
+  render(el: HTMLElement) {
+    const div = el.createDiv()
+    const input = div.createEl('input')
+    input.placeholder = 'Type association'
   }
 
-  getAll(): TFile[] {
+  getAll() {
     const folder =
       this.plugin.app.vault.getAbstractFileByPath(
         this.plugin.settings.rootFolder

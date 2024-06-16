@@ -6,29 +6,32 @@ import {
 } from '@/files'
 import { AList } from '@/list'
 import type MemoPlugin from '@/main'
-import type { TFile } from 'obsidian'
 
 export class Associations extends AList {
   constructor(plugin: MemoPlugin) {
     super(plugin)
   }
 
-  get filteredFiles(): TFile[] {
+  get filteredFiles() {
     return filterFilesByLinks(
       this.files,
       this.plugin.memo?.suggestions?.links
     )
   }
 
-  getItem(): TFile {
+  getItem() {
     return getRandomFile(this.filteredFiles)
   }
 
-  render(): void {
-    throw new Error('Method not implemented.')
+  render(el: HTMLElement) {
+    if (!this.item) return
+
+    const div = el.createDiv()
+    div.innerHTML = this.item.basename
+    el.appendChild(div)
   }
 
-  getAll(): TFile[] {
+  getAll() {
     const folder =
       this.plugin.app.vault.getAbstractFileByPath(
         this.plugin.settings.rootFolder

@@ -24,7 +24,7 @@ export abstract class AList implements IList {
 
   abstract getItem(): TFile | null
 
-  abstract render(): void
+  abstract render(el: HTMLElement): void
 
   abstract getAll(): TFile[]
 }
