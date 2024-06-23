@@ -22,6 +22,10 @@ export abstract class AList implements IList {
     return getFilesLinks(this.plugin.app, this.files)
   }
 
+  get itemName() {
+    return this.item?.basename || ''
+  }
+
   abstract getItem(): TFile | null
 
   abstract render(el: HTMLElement): void

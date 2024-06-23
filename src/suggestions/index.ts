@@ -43,6 +43,8 @@ export class Suggestions extends AList {
   render(el: HTMLElement) {
     const div = el.createDiv()
     const input = div.createEl('input')
+    input.type = 'text'
+    input.name = 'association'
     input.placeholder = 'Type association'
   }
 

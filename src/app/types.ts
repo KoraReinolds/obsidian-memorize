@@ -6,7 +6,7 @@ export interface IMemoApp {
   associations: IList | null
   suggestions: IList | null
 
-  check(): void
+  check(form: HTMLFormElement): void
   render(el: HTMLElement): void
   next(): void
 }

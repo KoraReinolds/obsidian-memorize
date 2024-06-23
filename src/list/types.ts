@@ -7,6 +7,7 @@ export interface IList {
   links: Set<string>
   plugin: MemoPlugin
   item: TFile | null
+  itemName: string
 
   render(el: HTMLElement): void
   next(): void

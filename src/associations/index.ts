@@ -27,7 +27,7 @@ export class Associations extends AList {
     if (!this.item) return
 
     const div = el.createDiv()
-    div.innerHTML = this.item.basename
+    div.innerHTML = this.itemName
     el.appendChild(div)
   }
 
