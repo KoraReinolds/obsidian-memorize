@@ -9,9 +9,9 @@ import { MemoApp } from './app'
 export default class MemoPlugin extends Plugin {
   settings: ICodeBlockSettings = {
     rootFolder: '',
+    mode: 'random',
     association: {
-      tag: '',
-      mode: 'ramdom'
+      tag: ''
     },
     suggestion: {
       tag: ''
@@ -38,8 +38,8 @@ export default class MemoPlugin extends Plugin {
           } else {
             throw new Error('Not valid settings')
           }
-        } catch {
-          el.innerHTML = 'Parsing error'
+        } catch (e) {
+          el.innerHTML = 'Parsing error: \n' + e
         }
       }
     )
