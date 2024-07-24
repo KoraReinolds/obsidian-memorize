@@ -29,7 +29,9 @@ export class MemoApp implements IMemoApp {
 
     this.status =
       association.toString().toLowerCase() ===
-      this.suggestions?.itemName.toLowerCase()
+      this.suggestions?.items
+        .find((item) => item.basename.toLowerCase())
+        ?.basename.toLocaleLowerCase()
         ? 'ok'
         : 'error'
 

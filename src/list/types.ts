@@ -6,11 +6,10 @@ export interface IList {
   filteredFiles: TFile[]
   links: Set<string>
   plugin: MemoPlugin
-  item: TFile | null
-  itemName: string
+  items: TFile[]
 
   render(el: HTMLElement): void
   next(): void
   getAll(): TFile[]
-  getItem(): TFile | null
+  getItems(): TFile[]
 }

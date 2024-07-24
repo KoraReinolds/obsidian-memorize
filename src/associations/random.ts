@@ -19,15 +19,17 @@ export class RandomAssociations extends AList {
     )
   }
 
-  getItem() {
-    return getRandomFile(this.filteredFiles)
+  getItems() {
+    return [getRandomFile(this.filteredFiles)].filter(
+      (file) => !!file
+    )
   }
 
   render(el: HTMLElement) {
-    if (!this.item) return
+    if (!this.items) return
 
     const div = el.createDiv()
-    div.innerHTML = this.itemName
+    div.innerHTML = this.items[0]?.basename
     el.appendChild(div)
   }
 

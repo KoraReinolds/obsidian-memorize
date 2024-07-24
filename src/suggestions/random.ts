@@ -21,14 +21,15 @@ export class RandomSuggestions extends AList {
     )
   }
 
-  getItem() {
-    const association =
-      this.plugin.memo?.associations?.item || null
+  getItems() {
+    const associations =
+      this.plugin.memo?.associations?.items || null
 
-    if (!association) return null
+    if (!associations || !associations[0]) return []
+
     const associationLinks = getFilesLinks(
       this.plugin.app,
-      [association]
+      associations
     )
 
     const suggestions = filterFilesByLinks(
@@ -36,7 +37,7 @@ export class RandomSuggestions extends AList {
       associationLinks
     )
 
-    return getRandomFile(suggestions)
+    return suggestions
   }
 
   render(el: HTMLElement) {
