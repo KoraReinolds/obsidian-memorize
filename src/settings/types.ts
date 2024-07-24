@@ -2,7 +2,7 @@ export type TMode = 'card' | 'random'
 
 export interface ICodeBlockSettings {
   rootFolder: string
-  mode?: TMode
+  mode: TMode
   association: {
     tag: string
   }
@@ -30,7 +30,7 @@ export const isCodeBlockSettings = (
   if (!data.rootFolder)
     throw new Error('RootFolder is required')
 
-  if (data.mode && !isMode(data.mode))
+  if (!data.mode || !isMode(data.mode))
     throw new Error('Unsupported mode: ' + data.mode)
 
   return true

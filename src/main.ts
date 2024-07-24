@@ -1,5 +1,7 @@
 import { Plugin } from 'obsidian'
 import { parse } from 'yaml'
+import { associationMapper } from '@/associations'
+import { suggestionMapper } from '@/suggestions'
 import {
   isCodeBlockSettings,
   type ICodeBlockSettings
@@ -31,7 +33,14 @@ export default class MemoPlugin extends Plugin {
           if (isCodeBlockSettings(settings)) {
             this.settings = settings
             this.memo = new MemoApp(this)
-            this.memo.init()
+            this.memo.init({
+              association: new associationMapper[
+                this.settings.mode
+              ](this),
+              suggestion: new suggestionMapper[
+                this.settings.mode
+              ](this)
+            })
             this.memo.next()
             this.memo.render(el)
             console.log(this.memo)

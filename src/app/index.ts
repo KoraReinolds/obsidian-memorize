@@ -1,8 +1,7 @@
 import type MemoPlugin from '@/main'
-import { Associations } from '@/associations'
-import { Suggestions } from '@/suggestions'
 import type { IMemoApp } from './types'
 import type { IList } from '@/list/types'
+import type { AList } from '@/list'
 
 export class MemoApp implements IMemoApp {
   plugin: MemoPlugin
@@ -14,9 +13,12 @@ export class MemoApp implements IMemoApp {
     this.plugin = plugin
   }
 
-  init(): void {
-    this.associations = new Associations(this.plugin)
-    this.suggestions = new Suggestions(this.plugin)
+  init(params: {
+    association: AList
+    suggestion: AList
+  }): void {
+    this.associations = params.association
+    this.suggestions = params.suggestion
   }
 
   check(form: HTMLFormElement): void {
