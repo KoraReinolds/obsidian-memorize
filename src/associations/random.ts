@@ -1,26 +1,33 @@
+import type {
+  IMemoApp,
+  TObsidianAppParams
+} from '@/app/types'
 import {
   filterFilesByLinks,
   filterFilesByTag,
   getAllFiles,
-  getRandomFile
+  getRandomItem
 } from '@/files'
-import { AList } from '@/list'
-import type MemoPlugin from '@/main'
+import { AObsidianList } from '@/list'
+import type { IObsidianList } from '@/list/types'
 
-export class RandomAssociations extends AList {
-  constructor(plugin: MemoPlugin) {
-    super(plugin)
+export class RandomAssociations extends AObsidianList {
+  _memo: IMemoApp<IObsidianList>
+
+  constructor(params: TObsidianAppParams) {
+    super(params)
+    this._memo = params.memo
   }
 
-  get filteredFiles() {
+  get filteredItems() {
     return filterFilesByLinks(
-      this.files,
-      this.plugin.memo?.suggestions?.links
-    )
+      this._files,
+      this._memo?.suggestions?.getLinks()
+    ).map(this.mapper)
   }
 
   getItems() {
-    return [getRandomFile(this.filteredFiles)].filter(
+    return [getRandomItem(this.filteredItems)].filter(
       (file) => !!file
     )
   }
@@ -29,22 +36,21 @@ export class RandomAssociations extends AList {
     if (!this.items) return
 
     const div = el.createDiv()
-    div.innerHTML = this.items[0]?.basename
+    div.innerHTML = this.items[0]?.value
     el.appendChild(div)
   }
 
   getAll() {
-    const folder =
-      this.plugin.app.vault.getAbstractFileByPath(
-        this.plugin.settings.rootFolder
-      )
+    const folder = this._app.vault.getAbstractFileByPath(
+      this._settings.rootFolder
+    )
 
     const files = getAllFiles(folder)
 
     const associations = filterFilesByTag(
-      this.plugin.app,
+      this._app,
       files,
-      this.plugin.settings.association.tag
+      this._settings.association.tag
     )
 
     return associations

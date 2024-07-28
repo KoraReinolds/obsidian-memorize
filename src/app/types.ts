@@ -1,10 +1,10 @@
-import type { IList } from '@/list/types'
+import type { TObsidianListParams } from '@/list/types'
 
 export type TCheckFunc = (params: TCheckParams) => boolean
 
-export interface IMemoApp {
-  associations: IList | null
-  suggestions: IList | null
+export interface IMemoApp<T> {
+  associations: T | null
+  suggestions: T | null
 
   check: TCheckFunc
   render(el: HTMLElement): void
@@ -23,4 +23,8 @@ export type TCheckParams = {
 export interface ICheckResult<T> {
   status: 'ok' | 'error' | 'empty'
   details: T
+}
+
+export type TObsidianAppParams = TObsidianListParams & {
+  memo: IMemoApp<any>
 }

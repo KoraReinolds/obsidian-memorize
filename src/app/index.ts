@@ -1,10 +1,9 @@
 import type { IMemoApp, TCheckFunc } from './types'
-import type { IList } from '@/list/types'
-import type { AList } from '@/list'
+import type { IObsidianList } from '@/list/types'
 
-export class MemoApp implements IMemoApp {
-  associations: IList | null = null
-  suggestions: IList | null = null
+export class MemoApp implements IMemoApp<IObsidianList> {
+  associations: IObsidianList | null = null
+  suggestions: IObsidianList | null = null
   status: 'ok' | 'error' | 'empty' = 'empty'
   check: TCheckFunc
 
@@ -13,8 +12,8 @@ export class MemoApp implements IMemoApp {
   }
 
   init(params: {
-    association: AList
-    suggestion: AList
+    association: IObsidianList
+    suggestion: IObsidianList
   }): void {
     this.associations = params.association
     this.suggestions = params.suggestion
@@ -43,11 +42,7 @@ export class MemoApp implements IMemoApp {
       console.log(
         this.check({
           input: { value: `${association}` },
-          correct: (this.suggestions?.items || []).map(
-            (file) => ({
-              value: file.basename
-            })
-          )
+          correct: this.suggestions?.items || []
         })
       )
     }

@@ -34,13 +34,18 @@ export default class MemoPlugin extends Plugin {
           if (isCodeBlockSettings(settings)) {
             this.settings = settings
             this.memo = new MemoApp(randomCheck)
+            const params = {
+              settings: this.settings,
+              app: this.app,
+              memo: this.memo
+            }
             this.memo.init({
               association: new associationMapper[
                 this.settings.mode
-              ](this),
+              ](params),
               suggestion: new suggestionMapper[
                 this.settings.mode
-              ](this)
+              ](params)
             })
             this.memo.next()
             this.memo.render(el)

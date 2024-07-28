@@ -1,43 +1,54 @@
+import type {
+  IMemoApp,
+  TObsidianAppParams
+} from '@/app/types'
 import {
   filterFilesByLinks,
   filterFilesByTag,
   getAllFiles,
-  getFilesLinks,
-  getRandomFile
+  getFilesLinks
 } from '@/files'
-import { AList } from '@/list'
-import type MemoPlugin from '@/main'
+import { AObsidianList } from '@/list'
+import type { IObsidianList } from '@/list/types'
 
-export class RandomSuggestions extends AList {
-  constructor(plugin: MemoPlugin) {
-    super(plugin)
-    this.files = this.getAll()
+export class RandomSuggestions extends AObsidianList {
+  _memo: IMemoApp<IObsidianList>
+
+  constructor(params: TObsidianAppParams) {
+    super(params)
+    this._files = this.getAll()
+    this._memo = params.memo
   }
 
-  get filteredFiles() {
+  get filteredItems() {
     return filterFilesByLinks(
-      this.files,
-      this.plugin.memo?.associations?.links
-    )
+      this._files,
+      this._memo?.associations?.getLinks()
+    ).map(this.mapper)
   }
 
   getItems() {
     const associations =
-      this.plugin.memo?.associations?.items || null
+      this._memo?.associations?.items || null
 
     if (!associations || !associations[0]) return []
 
     const associationLinks = getFilesLinks(
-      this.plugin.app,
-      associations
+      this._app,
+      (this._memo?.associations?._files || []).filter(
+        (file) =>
+          associations.some(
+            (item) => item.value === file.basename
+          )
+      )
     )
 
     const suggestions = filterFilesByLinks(
-      this.files,
+      this._files,
       associationLinks
     )
 
-    return suggestions
+    return suggestions.map(this.mapper)
   }
 
   render(el: HTMLElement) {
@@ -49,17 +60,16 @@ export class RandomSuggestions extends AList {
   }
 
   getAll() {
-    const folder =
-      this.plugin.app.vault.getAbstractFileByPath(
-        this.plugin.settings.rootFolder
-      )
+    const folder = this._app.vault.getAbstractFileByPath(
+      this._settings.rootFolder
+    )
 
     const files = getAllFiles(folder)
 
     const suggestions = filterFilesByTag(
-      this.plugin.app,
+      this._app,
       files,
-      this.plugin.settings.suggestion.tag
+      this._settings.suggestion.tag
     )
 
     return suggestions

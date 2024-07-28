@@ -69,8 +69,8 @@ export const getFilesLinks = (
       .flat()
   )
 
-export const getRandomFile = (files: TFile[]) => {
-  return files.length
-    ? files[getRandomValueBetween(0, files.length - 1)]
+export const getRandomItem = (items: any[]) => {
+  return items.length
+    ? items[getRandomValueBetween(0, items.length - 1)]
     : null
 }

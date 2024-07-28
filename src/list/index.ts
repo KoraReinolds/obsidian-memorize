@@ -1,28 +1,41 @@
-import type { TFile } from 'obsidian'
-import type { IList } from './types'
-import type MemoPlugin from '@/main'
+import type { App, TFile } from 'obsidian'
+import type {
+  IObsidianList,
+  TItem,
+  TObsidianListParams
+} from './types'
 import { getFilesLinks } from '@/files'
+import type { TLinks } from '@/files/types'
+import type { ICodeBlockSettings } from '@/settings/types'
 
-export abstract class AList implements IList {
-  files: TFile[]
-  plugin: MemoPlugin
-  items: TFile[] = []
-  abstract filteredFiles: TFile[]
+export abstract class AObsidianList
+  implements IObsidianList
+{
+  _files: TFile[]
+  _app: App
+  _settings: ICodeBlockSettings
+  items: TItem[] = []
+  abstract filteredItems: TItem[]
 
-  constructor(plugin: MemoPlugin) {
-    this.plugin = plugin
-    this.files = this.getAll()
+  constructor(params: TObsidianListParams) {
+    this._app = params.app
+    this._settings = params.settings
+    this._files = this.getAll()
+  }
+
+  mapper(args: TFile): TItem {
+    return { value: args.basename }
   }
 
   next(): void {
     this.items = this.getItems()
   }
 
-  get links() {
-    return getFilesLinks(this.plugin.app, this.files)
+  getLinks(): TLinks {
+    return getFilesLinks(this._app, this._files)
   }
 
-  abstract getItems(): TFile[]
+  abstract getItems(): TItem[]
 
   abstract render(el: HTMLElement): void
 
