@@ -7,6 +7,7 @@ import {
   type ICodeBlockSettings
 } from './settings/types'
 import { MemoApp } from './app'
+import { randomCheck } from './app/checkResult'
 
 export default class MemoPlugin extends Plugin {
   settings: ICodeBlockSettings = {
@@ -32,7 +33,7 @@ export default class MemoPlugin extends Plugin {
 
           if (isCodeBlockSettings(settings)) {
             this.settings = settings
-            this.memo = new MemoApp(this)
+            this.memo = new MemoApp(randomCheck)
             this.memo.init({
               association: new associationMapper[
                 this.settings.mode

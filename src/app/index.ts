@@ -1,16 +1,15 @@
-import type MemoPlugin from '@/main'
-import type { IMemoApp } from './types'
+import type { IMemoApp, TCheckFunc } from './types'
 import type { IList } from '@/list/types'
 import type { AList } from '@/list'
 
 export class MemoApp implements IMemoApp {
-  plugin: MemoPlugin
   associations: IList | null = null
   suggestions: IList | null = null
   status: 'ok' | 'error' | 'empty' = 'empty'
+  check: TCheckFunc
 
-  constructor(plugin: MemoPlugin) {
-    this.plugin = plugin
+  constructor(check: TCheckFunc) {
+    this.check = check
   }
 
   init(params: {
@@ -19,31 +18,6 @@ export class MemoApp implements IMemoApp {
   }): void {
     this.associations = params.association
     this.suggestions = params.suggestion
-  }
-
-  check(form: HTMLFormElement): void {
-    const formData = new FormData(form)
-    const { association } = Object.fromEntries(
-      formData.entries()
-    )
-
-    this.status =
-      association.toString().toLowerCase() ===
-      this.suggestions?.items
-        .find((item) => item.basename.toLowerCase())
-        ?.basename.toLocaleLowerCase()
-        ? 'ok'
-        : 'error'
-
-    const status = form.querySelector('#status')
-
-    if (!status) return
-
-    if (this.status === 'ok') {
-      status.innerHTML = 'ok'
-    } else if (this.status === 'error') {
-      status.innerHTML = 'error'
-    }
   }
 
   next(): void {
@@ -62,7 +36,20 @@ export class MemoApp implements IMemoApp {
     checkBtn.type = 'submit'
     form.onsubmit = (e) => {
       e.preventDefault()
-      this.check(form)
+      const formData = new FormData(form)
+      const { association } = Object.fromEntries(
+        formData.entries()
+      )
+      console.log(
+        this.check({
+          input: { value: `${association}` },
+          correct: (this.suggestions?.items || []).map(
+            (file) => ({
+              value: file.basename
+            })
+          )
+        })
+      )
     }
 
     const nextBtn = form.createEl('button')

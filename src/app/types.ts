@@ -1,12 +1,26 @@
 import type { IList } from '@/list/types'
-import { Plugin } from 'obsidian'
+
+export type TCheckFunc = (params: TCheckParams) => boolean
 
 export interface IMemoApp {
-  plugin: Plugin
   associations: IList | null
   suggestions: IList | null
 
-  check(form: HTMLFormElement): void
+  check: TCheckFunc
   render(el: HTMLElement): void
   next(): void
+}
+
+export type TCheckItem = {
+  value: string
+}
+
+export type TCheckParams = {
+  input: TCheckItem
+  correct: TCheckItem[]
+}
+
+export interface ICheckResult<T> {
+  status: 'ok' | 'error' | 'empty'
+  details: T
 }
