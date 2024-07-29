@@ -2,6 +2,8 @@ import type { TObsidianListParams } from '@/list/types'
 
 export type TCheckFunc = (params: TCheckParams) => boolean
 
+export type TResultFunc = (params: TCheckResult) => void
+
 export interface IMemoApp<T> {
   associations: T | null
   suggestions: T | null
@@ -14,6 +16,10 @@ export interface IMemoApp<T> {
 export type TCheckItem = {
   value: string
 }
+
+export type TCheckResult = {
+  el: HTMLElement
+} & TCheckParams
 
 export type TCheckParams = {
   input: TCheckItem

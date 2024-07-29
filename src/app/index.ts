@@ -1,14 +1,24 @@
-import type { IMemoApp, TCheckFunc } from './types'
-import type { IObsidianList } from '@/list/types'
+import type {
+  IMemoApp,
+  TCheckFunc,
+  TCheckItem,
+  TResultFunc
+} from './types'
+import type { IObsidianList, TItem } from '@/list/types'
 
 export class MemoApp implements IMemoApp<IObsidianList> {
   associations: IObsidianList | null = null
   suggestions: IObsidianList | null = null
   status: 'ok' | 'error' | 'empty' = 'empty'
   check: TCheckFunc
+  result: TResultFunc
 
-  constructor(check: TCheckFunc) {
-    this.check = check
+  constructor(params: {
+    check: TCheckFunc
+    result: TResultFunc
+  }) {
+    this.check = params.check
+    this.result = params.result
   }
 
   init(params: {
@@ -30,6 +40,8 @@ export class MemoApp implements IMemoApp<IObsidianList> {
     const form = el.createEl('form')
     this.suggestions?.render(form)
 
+    const correct = this.suggestions?.items || []
+
     const checkBtn = form.createEl('button')
     checkBtn.innerHTML = 'Check'
     checkBtn.type = 'submit'
@@ -39,12 +51,12 @@ export class MemoApp implements IMemoApp<IObsidianList> {
       const { association } = Object.fromEntries(
         formData.entries()
       )
-      console.log(
-        this.check({
-          input: { value: `${association}` },
-          correct: this.suggestions?.items || []
-        })
-      )
+      const input = { value: `${association}` }
+      this.check({
+        input,
+        correct
+      })
+      this.result({ el: status, correct, input })
     }
 
     const nextBtn = form.createEl('button')
