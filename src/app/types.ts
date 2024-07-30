@@ -1,4 +1,9 @@
-import type { TObsidianListParams } from '@/list/types'
+import type {
+  TItem,
+  TObsidianListParams
+} from '@/list/types'
+
+export type TSubmitFunc = (params: TSubmitParams) => void
 
 export type TCheckFunc = (params: TCheckParams) => boolean
 
@@ -8,7 +13,7 @@ export interface IMemoApp<T> {
   associations: T | null
   suggestions: T | null
 
-  check: TCheckFunc
+  submit: TSubmitFunc
   render(el: HTMLElement): void
   next(): void
 }
@@ -20,6 +25,12 @@ export type TCheckItem = {
 export type TCheckResult = {
   el: HTMLElement
 } & TCheckParams
+
+export type TSubmitParams = {
+  formData: FormData
+  status: HTMLElement
+  correct: TItem[]
+}
 
 export type TCheckParams = {
   input: TCheckItem

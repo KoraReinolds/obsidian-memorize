@@ -2,7 +2,8 @@ import type {
   IMemoApp,
   TCheckFunc,
   TCheckItem,
-  TResultFunc
+  TResultFunc,
+  TSubmitFunc
 } from './types'
 import type { IObsidianList, TItem } from '@/list/types'
 
@@ -10,15 +11,10 @@ export class MemoApp implements IMemoApp<IObsidianList> {
   associations: IObsidianList | null = null
   suggestions: IObsidianList | null = null
   status: 'ok' | 'error' | 'empty' = 'empty'
-  check: TCheckFunc
-  result: TResultFunc
+  submit: TSubmitFunc
 
-  constructor(params: {
-    check: TCheckFunc
-    result: TResultFunc
-  }) {
-    this.check = params.check
-    this.result = params.result
+  constructor(params: { submit: TSubmitFunc }) {
+    this.submit = params.submit
   }
 
   init(params: {
@@ -48,15 +44,7 @@ export class MemoApp implements IMemoApp<IObsidianList> {
     form.onsubmit = (e) => {
       e.preventDefault()
       const formData = new FormData(form)
-      const { association } = Object.fromEntries(
-        formData.entries()
-      )
-      const input = { value: `${association}` }
-      this.check({
-        input,
-        correct
-      })
-      this.result({ el: status, correct, input })
+      this.submit({ formData, status, correct })
     }
 
     const nextBtn = form.createEl('button')

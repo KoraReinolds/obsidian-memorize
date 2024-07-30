@@ -9,6 +9,8 @@ import {
 import { MemoApp } from './app'
 import { randomCheck } from './app/checkResult'
 import { randomResult } from './app/displayResult'
+import { randomSubmit } from './app/submit/random'
+import { submitMapper } from './app/submit'
 
 export default class MemoPlugin extends Plugin {
   settings: ICodeBlockSettings = {
@@ -35,8 +37,7 @@ export default class MemoPlugin extends Plugin {
           if (isCodeBlockSettings(settings)) {
             this.settings = settings
             this.memo = new MemoApp({
-              check: randomCheck,
-              result: randomResult
+              submit: submitMapper[this.settings.mode]
             })
             const params = {
               settings: this.settings,

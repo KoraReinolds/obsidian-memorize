@@ -1,4 +1,4 @@
-export type TMode = 'card' | 'random'
+export type TMode = 'card' | 'random' | 'list'
 
 export interface ICodeBlockSettings {
   rootFolder: string
@@ -11,8 +11,38 @@ export interface ICodeBlockSettings {
   }
 }
 
+export interface IListSettings {
+  rootFolder: string
+  mode: TMode
+  association: {
+    tag: string
+  }
+  suggestion: {
+    tag: string
+    range: {
+      max: number
+      min: number
+    }
+    total: number
+  }
+}
+
 const isMode = (value: any): value is TMode => {
-  return value === 'card' || value === 'random'
+  return ['card', 'random', 'list'].includes(value)
+}
+
+export const isListSettings = (
+  data: any
+): data is IListSettings => {
+  return (
+    data.suggestion.range &&
+    data.suggestion.range.min &&
+    typeof data.suggestion.range.min === 'number' &&
+    data.suggestion.range.max &&
+    typeof data.suggestion.range.max === 'number' &&
+    data.suggestion.total &&
+    typeof data.suggestion.total === 'number'
+  )
 }
 
 export const isCodeBlockSettings = (
@@ -32,6 +62,10 @@ export const isCodeBlockSettings = (
 
   if (!data.mode || !isMode(data.mode))
     throw new Error('Unsupported mode: ' + data.mode)
+  else {
+    if (!isListSettings(data))
+      throw new Error('Total and range are required')
+  }
 
   return true
 }
