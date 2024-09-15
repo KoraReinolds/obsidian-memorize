@@ -4,23 +4,16 @@ import {
 	MarkdownView,
 	Modal,
 	Notice,
-	Plugin,
-	PluginSettingTab,
-	Setting
+	Plugin
 } from 'obsidian'
+import { MemoSetting } from 'src/settings'
+import {
+	DEFAULT_MEMO_SETTINGS,
+	MemoPluginSettings
+} from 'src/settings/types'
 
-// Remember to rename these classes and interfaces!
-
-interface MyPluginSettings {
-	mySetting: string
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
-
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings
+export default class Memo extends Plugin {
+	settings: MemoPluginSettings
 
 	async onload() {
 		await this.loadSettings()
@@ -85,7 +78,7 @@ export default class MyPlugin extends Plugin {
 		})
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this))
+		this.addSettingTab(new MemoSetting(this.app, this))
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -111,7 +104,7 @@ export default class MyPlugin extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
-			DEFAULT_SETTINGS,
+			DEFAULT_MEMO_SETTINGS,
 			await this.loadData()
 		)
 	}
@@ -134,33 +127,5 @@ class SampleModal extends Modal {
 	onClose() {
 		const { contentEl } = this
 		contentEl.empty()
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin
-
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin)
-		this.plugin = plugin
-	}
-
-	display(): void {
-		const { containerEl } = this
-
-		containerEl.empty()
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc("It's a secret")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your secret')
-					.setValue(this.plugin.settings.mySetting)
-					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value
-						await this.plugin.saveSettings()
-					})
-			)
 	}
 }
