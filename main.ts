@@ -23,7 +23,35 @@ export default class Memo extends Plugin {
 	_settings: TSettings
 	_dv: any
 
-	displayCard(p: TItem, el: HTMLElement) {
+	displayBottomPanel(
+		el: HTMLElement,
+		callbacks: {
+			checkCallback: () => void
+			nextCallback: () => void
+		}
+	) {
+		const { checkCallback, nextCallback } = callbacks
+		const panel = el.createDiv()
+		panel.className = 'memo-bottom-panel'
+
+		const checkBtn = panel.createEl('button')
+		checkBtn.className = 'memo-button'
+		checkBtn.innerText = 'Check'
+		checkBtn.addEventListener('click', checkCallback)
+
+		const nextBtn = panel.createEl('button')
+		nextBtn.innerText = 'Next'
+		nextBtn.className = 'memo-button'
+		nextBtn.addEventListener('click', nextCallback)
+	}
+
+	renderCard(pages: TItem[], el: HTMLElement) {
+		el.innerHTML = ''
+
+		const p = getRandomItem(pages)
+
+		if (!p) throw new Error(`Nothing found for display`)
+
 		const associations = eval(
 			this._settings.associationKey.displayProperty
 		)
@@ -46,14 +74,20 @@ export default class Memo extends Plugin {
 		card.appendChild(answersDiv)
 		answersDiv.style.display = 'none'
 
-		card.addEventListener('click', () => {
+		const toggleCard = () => {
 			answersDiv.style.display =
 				answersDiv.style.display === 'none'
 					? 'block'
 					: 'none'
-		})
+		}
+		card.addEventListener('click', toggleCard)
 
 		el.appendChild(card)
+
+		this.displayBottomPanel(el, {
+			checkCallback: toggleCard,
+			nextCallback: () => this.renderCard(pages, el)
+		})
 	}
 
 	async onload() {
@@ -72,6 +106,11 @@ export default class Memo extends Plugin {
 			async (source, el, ctx) => {
 				try {
 					const userData = parse(source)
+
+					const cssContent = await this.loadCSSFile(
+						'src/assets/index.css'
+					)
+					this.injectCSS(cssContent)
 
 					const name = userData.name
 
@@ -128,12 +167,7 @@ export default class Memo extends Plugin {
 								.length
 					)
 
-					const page = getRandomItem(pages)
-
-					if (page) this.displayCard(page, el)
-					else {
-						throw new Error(`Nothing found for display`)
-					}
+					this.renderCard(pages, el)
 				} catch (err) {
 					new Notice(err)
 					el.innerHTML = 'Parsing error: \n' + err

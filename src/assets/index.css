@@ -21,3 +21,30 @@
   font-weight: bold;
   color: #61dafb;
 }
+
+.memo-bottom-panel {
+  display: flex;
+  justify-content: center;
+  width: 220px;
+  margin: 15px;
+  padding: 15px;
+  border-top: 1px solid #444;
+}
+
+.memo-bottom-panel .memo-button {
+  background-color: #61dafb;
+  border: none;
+  border-radius: 5px;
+  color: #282c34;
+  padding: 10px 20px;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.memo-bottom-panel .memo-button:hover {
+  background-color: #4db3e5;
+  transform: translateY(-1px);
+}
