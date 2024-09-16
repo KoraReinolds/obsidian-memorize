@@ -4,19 +4,118 @@ import {
 	MarkdownView,
 	Modal,
 	Notice,
-	Plugin
+	Plugin,
+	TFile
 } from 'obsidian'
+import { getRandomItem } from 'src/lib'
 import { MemoSetting } from 'src/settings'
 import {
 	DEFAULT_MEMO_SETTINGS,
-	MemoPluginSettings
+	MemoPluginSettings,
+	TSettings
 } from 'src/settings/types'
+import { parse } from 'yaml'
+
+export type TItem = Record<string, any> & { file: TFile }
+
+export const displayCard = (item: TItem) => {}
 
 export default class Memo extends Plugin {
 	settings: MemoPluginSettings
+	_settings: TSettings
+	_dv: any
+
+	displayCard(p: TItem) {
+		const associations = eval(
+			this._settings.associationKey.displayProperty
+		)
+
+		const suggestions = eval(
+			this._settings.suggestion.displayProperty
+		)
+
+		console.log(associations, suggestions)
+	}
 
 	async onload() {
 		await this.loadSettings()
+		this._dv = (
+			this.app as any
+		).plugins?.plugins.dataview.api
+
+		this.registerMarkdownCodeBlockProcessor(
+			'memo',
+			async (source, el, ctx) => {
+				try {
+					const userData = parse(source)
+
+					const name = userData.name
+
+					if (!name)
+						throw new Error(
+							"Can't find name property in the codeblock"
+						)
+
+					const settings = this.settings.list.find(
+						(set) => set.name === name
+					)?.settings
+
+					if (settings) this._settings = settings
+
+					if (!settings)
+						throw new Error(
+							`Can't find settings for "${name}"`
+						)
+
+					if (!settings.associationKey.displayProperty)
+						throw new Error(
+							`DisplayProperty for associationKey is required`
+						)
+
+					if (!settings.suggestion.displayProperty)
+						throw new Error(
+							`DisplayProperty for suggestion is required`
+						)
+
+					const p = await this._dv.pages(settings.fromQuery)
+					const allAssociations = new Set(
+						eval(settings.associationKey.displayProperty)
+					)
+
+					if (!allAssociations.size)
+						throw new Error(
+							`Nothing found for ${settings.associationKey.displayProperty}`
+						)
+
+					const allSuggestions = new Set(
+						eval(settings.suggestion.displayProperty)
+					)
+
+					if (!allSuggestions.size)
+						throw new Error(
+							`Nothing found for ${settings.suggestion.displayProperty}`
+						)
+
+					const pages: TItem[] = p.filter(
+						(p) =>
+							eval(settings.associationKey.displayProperty)
+								.length &&
+							eval(settings.suggestion.displayProperty)
+								.length
+					)
+
+					const page = getRandomItem(pages)
+
+					if (page) this.displayCard(page)
+					else {
+						throw new Error(`Nothing found for display`)
+					}
+				} catch (err) {
+					new Notice(err)
+					el.innerHTML = 'Parsing error: \n' + err
+				}
+			}
+		)
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
