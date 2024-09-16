@@ -18,14 +18,12 @@ import { parse } from 'yaml'
 
 export type TItem = Record<string, any> & { file: TFile }
 
-export const displayCard = (item: TItem) => {}
-
 export default class Memo extends Plugin {
 	settings: MemoPluginSettings
 	_settings: TSettings
 	_dv: any
 
-	displayCard(p: TItem) {
+	displayCard(p: TItem, el: HTMLElement) {
 		const associations = eval(
 			this._settings.associationKey.displayProperty
 		)
@@ -34,7 +32,28 @@ export default class Memo extends Plugin {
 			this._settings.suggestion.displayProperty
 		)
 
-		console.log(associations, suggestions)
+		const card = document.createElement('div')
+		card.className = 'memo-card'
+		card.textContent = Array.isArray(associations)
+			? associations.join(', ')
+			: associations
+
+		const answersDiv = document.createElement('div')
+		answersDiv.className = 'memo-answers'
+		answersDiv.textContent = Array.isArray(suggestions)
+			? suggestions.join(', ')
+			: suggestions
+		card.appendChild(answersDiv)
+		answersDiv.style.display = 'none'
+
+		card.addEventListener('click', () => {
+			answersDiv.style.display =
+				answersDiv.style.display === 'none'
+					? 'block'
+					: 'none'
+		})
+
+		el.appendChild(card)
 	}
 
 	async onload() {
@@ -42,6 +61,11 @@ export default class Memo extends Plugin {
 		this._dv = (
 			this.app as any
 		).plugins?.plugins.dataview.api
+
+		const cssContent = await this.loadCSSFile(
+			'src/assets/index.css'
+		)
+		this.injectCSS(cssContent)
 
 		this.registerMarkdownCodeBlockProcessor(
 			'memo',
@@ -106,7 +130,7 @@ export default class Memo extends Plugin {
 
 					const page = getRandomItem(pages)
 
-					if (page) this.displayCard(page)
+					if (page) this.displayCard(page, el)
 					else {
 						throw new Error(`Nothing found for display`)
 					}
@@ -210,6 +234,31 @@ export default class Memo extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings)
+	}
+
+	async loadCSSFile(filename: string): Promise<string> {
+		const path = `${this.manifest.dir}/${filename}`
+		const data = await this.app.vault.adapter.read(path)
+		return data
+	}
+
+	injectCSS(cssContent: string) {
+		const style = document.createElement('style')
+		style.type = 'text/css'
+		style.id = `plugin-styles-${this.manifest.id}`
+		document
+			.querySelectorAll(`#${style.id}`)
+			.forEach((style) => style.remove())
+		style.innerHTML = cssContent
+		document.head.appendChild(style)
+	}
+
+	removeInjectedCSS() {
+		const id = `plugin-styles-${this.manifest.id}`
+		const style = document.getElementById(id)
+		if (style) {
+			style.remove()
+		}
 	}
 }
 
