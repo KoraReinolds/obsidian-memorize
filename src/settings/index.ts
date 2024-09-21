@@ -32,6 +32,8 @@ export class MemoSetting extends PluginSettingTab {
 		this.listEl.appendChild(containerEl)
 		containerEl.innerHTML = ''
 
+		containerEl.createEl('h1').innerHTML = 'List range'
+
 		new Setting(containerEl)
 			.setName('Min')
 			.setDesc(

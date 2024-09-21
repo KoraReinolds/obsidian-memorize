@@ -48,3 +48,7 @@
   background-color: #4db3e5;
   transform: translateY(-1px);
 }
+
+.block-language-memo form[submitted=true] li[correct=true] input[type=checkbox] {
+  background: #4db3e5;
+}

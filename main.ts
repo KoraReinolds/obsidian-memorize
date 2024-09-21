@@ -7,27 +7,77 @@ import {
 	Plugin,
 	TFile
 } from 'obsidian'
-import { getRandomItem } from 'src/lib'
+import {
+	getRandomItem,
+	getRandomValueBetween,
+	toArray
+} from 'src/lib'
 import { MemoSetting } from 'src/settings'
 import {
 	DEFAULT_MEMO_SETTINGS,
 	MemoPluginSettings,
+	TMode,
 	TSettings
 } from 'src/settings/types'
 import { parse } from 'yaml'
 
 export type TItem = Record<string, any> & { file: TFile }
+export type TDisplayItem = {
+	value: string
+	correct: boolean
+}
 
 export default class Memo extends Plugin {
 	settings: MemoPluginSettings
 	_settings: TSettings
 	_dv: any
+	_pages: TItem[]
+	_associations: string[]
+	_suggestions: string[]
+	_unrelatedSuggestions: string[]
+
+	getListItems(): TDisplayItem[] {
+		const rangeSettings =
+			this._settings.suggestion.additionalSettings
+
+		const associations = this._associations.shuffle()
+		if (!associations) return []
+		const associationItem = associations[0]
+		if (!associationItem) return []
+
+		const min = rangeSettings.range.min
+		const max = getRandomValueBetween(
+			+min,
+			+rangeSettings.range.max
+		)
+
+		const suggestionItems = this._suggestions
+			.slice(0, max)
+			.map((item) => {
+				return { value: item, correct: true }
+			})
+
+		const unrelatedDuggestionItems =
+			this._unrelatedSuggestions
+				.slice(
+					0,
+					+rangeSettings.total - +suggestionItems.length
+				)
+				.map((item) => {
+					return { value: item, correct: false }
+				})
+
+		return [
+			...unrelatedDuggestionItems,
+			...suggestionItems
+		].shuffle()
+	}
 
 	displayBottomPanel(
 		el: HTMLElement,
 		callbacks: {
-			checkCallback: () => void
-			nextCallback: () => void
+			checkCallback: (e: Event) => void
+			nextCallback: (e: Event) => void
 		}
 	) {
 		const { checkCallback, nextCallback } = callbacks
@@ -35,6 +85,7 @@ export default class Memo extends Plugin {
 		panel.className = 'memo-bottom-panel'
 
 		const checkBtn = panel.createEl('button')
+		checkBtn.type = 'submit'
 		checkBtn.className = 'memo-button'
 		checkBtn.innerText = 'Check'
 		checkBtn.addEventListener('click', checkCallback)
@@ -45,20 +96,23 @@ export default class Memo extends Plugin {
 		nextBtn.addEventListener('click', nextCallback)
 	}
 
-	renderCard(pages: TItem[], el: HTMLElement) {
+	renderCard(el: HTMLElement) {
+		const pages = this._pages
 		el.innerHTML = ''
 
 		const p = getRandomItem(pages)
 
 		if (!p) throw new Error(`Nothing found for display`)
 
-		const associations = eval(
-			this._settings.associationKey.displayProperty
+		const associations = toArray(
+			eval(this._settings.associationKey.displayProperty)
 		)
+		this._associations = associations
 
-		const suggestions = eval(
-			this._settings.suggestion.displayProperty
+		const suggestions = toArray(
+			eval(this._settings.suggestion.displayProperty)
 		)
+		this._suggestions = suggestions
 
 		const card = document.createElement('div')
 		card.className = 'memo-card'
@@ -85,8 +139,81 @@ export default class Memo extends Plugin {
 		el.appendChild(card)
 
 		this.displayBottomPanel(el, {
-			checkCallback: toggleCard,
-			nextCallback: () => this.renderCard(pages, el)
+			checkCallback: (e: Event) => {
+				e.preventDefault()
+				toggleCard()
+			},
+			nextCallback: (e: Event) => {
+				e.preventDefault()
+				this.renderCard(el)
+			}
+		})
+	}
+
+	renderList(el: HTMLElement) {
+		console.log(this)
+
+		const pages = this._pages
+		el.innerHTML = ''
+
+		const p = getRandomItem(pages)
+
+		if (!p) throw new Error(`Nothing found for display`)
+
+		const associations = toArray(
+			eval(this._settings.associationKey.displayProperty)
+		)
+		this._associations = associations
+
+		const suggestions = toArray(
+			eval(this._settings.suggestion.displayProperty)
+		)
+		this._suggestions = suggestions
+
+		{
+			// eslint-disable-next-line
+			const p = pages
+			const allSuggestions = eval(
+				this._settings.suggestion.displayProperty
+			)
+			this._unrelatedSuggestions = allSuggestions.filter(
+				(item: string) => !this._suggestions.includes(item)
+			)
+		}
+
+		const card = document.createElement('div')
+		card.className = 'memo-card'
+		card.textContent = associations.join(', ')
+		el.appendChild(card)
+
+		const form = el.createEl('form')
+
+		const ul = form.createEl('ul')
+		this.getListItems().forEach((item) => {
+			const li = ul.createEl('li')
+			li.setAttr('correct', item.correct)
+
+			const checkbox = li.createEl('input')
+			const id = `${Math.random()}`
+			checkbox.id = id
+			checkbox.type = 'checkbox'
+			checkbox.name = item.value
+			const label = li.createEl('label')
+			label.innerHTML = item.value
+			label.setAttr('for', id)
+		})
+
+		form.onsubmit = (e) => {
+			e.preventDefault()
+			form.setAttr('submitted', true)
+		}
+
+		this.displayBottomPanel(form, {
+			checkCallback: (e) => {},
+			nextCallback: (e) => {
+				e.preventDefault()
+				this.renderList(el)
+			}
 		})
 	}
 
@@ -160,6 +287,7 @@ export default class Memo extends Plugin {
 						)
 
 					const pages: TItem[] = p.filter(
+						// @ts-ignore
 						(p) =>
 							eval(settings.associationKey.displayProperty)
 								.length &&
@@ -167,7 +295,12 @@ export default class Memo extends Plugin {
 								.length
 					)
 
-					this.renderCard(pages, el)
+					this._pages = pages
+
+					const mode: TMode = settings.mode
+
+					if (mode === 'card') this.renderCard(el)
+					else if (mode === 'list') this.renderList(el)
 				} catch (err) {
 					new Notice(err)
 					el.innerHTML = 'Parsing error: \n' + err

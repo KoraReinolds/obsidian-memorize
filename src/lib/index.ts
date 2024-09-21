@@ -15,3 +15,17 @@ export const getRandomItem = <T>(items: T[]): T | null => {
 		? items[getRandomValueBetween(0, items.length - 1)]
 		: null
 }
+
+export const toArray = (input: any) => {
+	if (
+		input === null ||
+		typeof input !== 'object' ||
+		Array.isArray(input)
+	) {
+		return Array.isArray(input) ? input : [input]
+	} else {
+		throw new Error(
+			'Input is a complex value and cannot be converted to an array'
+		)
+	}
+}
