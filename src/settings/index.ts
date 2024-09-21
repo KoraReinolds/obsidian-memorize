@@ -2,6 +2,7 @@ import MemoPlugin from '../../main'
 import { App, PluginSettingTab, Setting } from 'obsidian'
 import {
 	DEFAULT_SETTINGS,
+	TSuggestionSettings,
 	type TMode,
 	type TSettings
 } from './types'
@@ -9,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export class MemoSetting extends PluginSettingTab {
 	plugin: MemoPlugin
-	list: HTMLElement | undefined
+	listEl: HTMLElement | undefined
 
 	constructor(app: App, plugin: MemoPlugin) {
 		super(app, plugin)
@@ -17,6 +18,68 @@ export class MemoSetting extends PluginSettingTab {
 	}
 
 	expandedBlocks: Record<string, boolean> = {}
+	suggestionSettingsEl: Record<string, HTMLElement> = {}
+
+	renderSugestionSettings(
+		containerEl: HTMLElement,
+		settings: TSuggestionSettings,
+		mode: TMode
+	) {
+		if (!containerEl || !this.listEl) return
+
+		if (mode !== 'list') return
+
+		this.listEl.appendChild(containerEl)
+		containerEl.innerHTML = ''
+
+		new Setting(containerEl)
+			.setName('Min')
+			.setDesc(
+				'The minimum number of correct answers in the selection list'
+			)
+			.addText((text) =>
+				text
+					.setValue(`${settings.range.min ?? 1}`)
+					.setPlaceholder('Type min')
+					.onChange(async (value) => {
+						settings.range.min = +value
+						this.plugin.saveSettings()
+					})
+			)
+
+		new Setting(containerEl)
+			.setName('Max')
+			.setDesc(
+				'The maximum number of correct answers in the selection list'
+			)
+			.addText((text) =>
+				text
+					.setValue(`${settings.range.max ?? 2}`)
+					.setPlaceholder('Type max')
+					.onChange(async (value) => {
+						settings.range.max = +value
+						this.plugin.saveSettings()
+					})
+			)
+
+		new Setting(containerEl)
+			.setName('Total')
+			.setDesc(
+				'The total number of answers in the selection list'
+			)
+			.addText((text) =>
+				text
+					.setValue(`${settings.total ?? 4}`)
+					.setPlaceholder('Type total')
+					.onChange(async (value) => {
+						if (!Number.isInteger(value)) {
+							text.setValue(`${Number.parseInt(value)}`)
+						}
+						settings.total = +value
+						this.plugin.saveSettings()
+					})
+			)
+	}
 
 	renderList(
 		list: {
@@ -25,10 +88,12 @@ export class MemoSetting extends PluginSettingTab {
 			settings: TSettings
 		}[]
 	) {
-		if (!this.list) return
+		if (!this.listEl) return
+
+		this.listEl.innerHTML = ''
 
 		const containerEl = this.containerEl.appendChild(
-			this.list
+			this.listEl
 		)
 
 		list.forEach((memoSettings) => {
@@ -71,6 +136,10 @@ export class MemoSetting extends PluginSettingTab {
 
 			if (!this.expandedBlocks[id]) return
 
+			if (!this.suggestionSettingsEl[id]) {
+				this.suggestionSettingsEl[id] = div.createDiv()
+			}
+
 			new Setting(div)
 				.setName('FROM dataview query')
 				.setDesc(
@@ -109,12 +178,14 @@ export class MemoSetting extends PluginSettingTab {
 				.addDropdown((dd) =>
 					dd
 						.addOptions({
-							card: 'card'
+							card: 'Card',
+							list: 'List'
 						})
 						.setValue(settings.mode)
 						.onChange((value) => {
 							settings.mode = value as TMode
 							this.plugin.saveSettings()
+							this.renderList(list)
 						})
 				)
 			div.createEl('h1').innerHTML = 'Key'
@@ -153,6 +224,12 @@ export class MemoSetting extends PluginSettingTab {
 							this.plugin.saveSettings()
 						})
 				)
+
+			this.renderSugestionSettings(
+				this.suggestionSettingsEl[id],
+				settings.suggestion.additionalSettings,
+				settings.mode
+			)
 		})
 	}
 
@@ -163,7 +240,7 @@ export class MemoSetting extends PluginSettingTab {
 
 		containerEl.empty()
 
-		this.list = containerEl.createDiv()
+		this.listEl = containerEl.createDiv()
 
 		new Setting(containerEl)
 			.setName('List of logic block')

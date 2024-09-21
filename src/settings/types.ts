@@ -1,4 +1,4 @@
-export type TMode = 'card'
+export type TMode = 'card' | 'list'
 
 export interface MemoPluginSettings {
 	list: {
@@ -22,9 +22,26 @@ export const DEFAULT_SETTINGS: TSettings = {
 		displayProperty: 'p.file.name'
 	},
 	suggestion: {
-		displayProperty: ''
+		displayProperty: '',
+		additionalSettings: {
+			range: {
+				max: 2,
+				min: 1
+			},
+			total: 4
+		}
 	}
 }
+
+export type TRangeSettings = {
+	range: {
+		max: number
+		min: number
+	}
+	total: number
+}
+
+export type TSuggestionSettings = TRangeSettings
 
 export type TSettings = {
 	fromQuery: string
@@ -35,6 +52,7 @@ export type TSettings = {
 	}
 	suggestion: {
 		displayProperty: string
+		additionalSettings: TSuggestionSettings
 	}
 }
 
