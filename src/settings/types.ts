@@ -1,4 +1,4 @@
-export type TMode = 'card' | 'list'
+export type TMode = 'card' | 'list' | 'badges'
 
 export interface MemoPluginSettings {
 	list: {

@@ -181,7 +181,8 @@ export class MemoSetting extends PluginSettingTab {
 					dd
 						.addOptions({
 							card: 'Card',
-							list: 'List'
+							list: 'List',
+							badges: 'Badges'
 						})
 						.setValue(settings.mode)
 						.onChange((value) => {

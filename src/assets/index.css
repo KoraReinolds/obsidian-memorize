@@ -52,3 +52,70 @@
 .block-language-memo form[submitted=true] li[correct=true] input[type=checkbox] {
   background: #4db3e5;
 }
+
+.memo-badge {
+  cursor: pointer;
+  background-color: #282c34;
+  border-radius: 12px;
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s, transform 0.4s ease;
+}
+
+.memo-badge:hover {
+  background-color: #4db3e5;
+  color: #282c34;
+  transform: translateY(-2px);
+}
+
+.memo-badge-container {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 300px;
+}
+
+.memo-badge[style*="order"] {
+  background-color: #61dafb;
+  color: #000;
+  font-weight: bold;
+  transform: translateY(-3px);
+}
+
+/* .memo-badge[correct] {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  border: 2px solid #388E3C;
+} */
+
+.memo-badge[wrong] {
+  background-color: #282c34;
+  color: white;
+  font-weight: bold;
+  border: 2px solid #282c34;
+}
+
+.memo-divider {
+  width: 100%;
+  height: 1px;
+  margin: 20px 0;
+  clear: both;
+  padding: 0 15px;
+}
+
+.memo-divider div {
+  width: 220px;
+  border-top: 1px solid #444;
+}
+
+.memo-badge-container:has(.memo-badge[style*="order"]) .memo-divider {
+  display: block;
+}
+
+.memo-badge-container .memo-divider {
+  display: none;
+}

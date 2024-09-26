@@ -25,6 +25,8 @@ export type TItem = Record<string, any> & { file: TFile }
 export type TDisplayItem = {
 	value: string
 	correct: boolean
+	displayValue: string
+	selected: boolean
 }
 
 export default class Memo extends Plugin {
@@ -35,6 +37,27 @@ export default class Memo extends Plugin {
 	_associations: string[]
 	_suggestions: string[]
 	_unrelatedSuggestions: string[]
+
+	getBadgeItems(suggestions: string[]): TDisplayItem[] {
+		const associations = this._associations.shuffle()
+		if (!associations) return []
+		const associationItem = associations[0]
+		if (!associationItem) return []
+
+		const suggestionItems = suggestions
+			.map((item) => item.split(' '))
+			.flat()
+			.map((item) => {
+				return {
+					value: item,
+					displayValue: item.toLocaleLowerCase(),
+					correct: true,
+					selected: false
+				}
+			})
+
+		return suggestionItems.shuffle()
+	}
 
 	getListItems(): TDisplayItem[] {
 		const rangeSettings =
@@ -54,7 +77,12 @@ export default class Memo extends Plugin {
 		const suggestionItems = this._suggestions
 			.slice(0, max)
 			.map((item) => {
-				return { value: item, correct: true }
+				return {
+					value: item,
+					correct: true,
+					displayValue: item,
+					selected: false
+				}
 			})
 
 		const unrelatedDuggestionItems =
@@ -64,7 +92,12 @@ export default class Memo extends Plugin {
 					+rangeSettings.total - +suggestionItems.length
 				)
 				.map((item) => {
-					return { value: item, correct: false }
+					return {
+						value: item,
+						correct: false,
+						displayValue: item,
+						selected: false
+					}
 				})
 
 		return [
@@ -151,8 +184,6 @@ export default class Memo extends Plugin {
 	}
 
 	renderList(el: HTMLElement) {
-		console.log(this)
-
 		const pages = this._pages
 		el.innerHTML = ''
 
@@ -213,6 +244,129 @@ export default class Memo extends Plugin {
 			nextCallback: (e) => {
 				e.preventDefault()
 				this.renderList(el)
+			}
+		})
+	}
+
+	renderBadges(el: HTMLElement) {
+		console.log(this)
+
+		const pages = this._pages
+		el.innerHTML = ''
+
+		const p = getRandomItem(pages)
+
+		if (!p) throw new Error(`Nothing found for display`)
+
+		const associations = toArray(
+			eval(this._settings.associationKey.displayProperty)
+		)
+		this._associations = associations
+
+		const suggestions = toArray(
+			eval(this._settings.suggestion.displayProperty)
+		)
+		this._suggestions = suggestions
+
+		{
+			// eslint-disable-next-line
+			const p = pages
+			const allSuggestions = eval(
+				this._settings.suggestion.displayProperty
+			)
+			this._unrelatedSuggestions = allSuggestions.filter(
+				(item: string) => !this._suggestions.includes(item)
+			)
+		}
+
+		const card = document.createElement('div')
+		card.className = 'memo-card'
+		card.textContent = associations.join(', ')
+		el.appendChild(card)
+
+		const form = el.createEl('form')
+		const container = form.createEl('div')
+		container.addClass('memo-badge-container')
+
+		let counter = 1
+
+		const suggestion = suggestions.shuffle()[0]
+		const badgeItems = this.getBadgeItems([suggestion])
+
+		badgeItems.forEach((item) => {
+			const span = container.createEl('span')
+			span.style.order = ''
+			span.onclick = () => {
+				item.selected = !item.selected
+				span.style.order = span.style.order
+					? ''
+					: `${counter++}`
+			}
+			span.setAttr('value', item.value)
+			span.classList.add('memo-badge')
+
+			span.innerHTML = item.displayValue
+		})
+		const div = container.createDiv()
+		div.classList.add('memo-divider')
+		div.createDiv()
+
+		form.onsubmit = (e) => {
+			e.preventDefault()
+			form.setAttr('submitted', true)
+
+			const badges = Array.from(
+				document.querySelectorAll('.memo-badge')
+			)
+				.filter((badge) => {
+					const orderValue = window
+						.getComputedStyle(badge)
+						.getPropertyValue('order')
+
+					return orderValue !== '0'
+				})
+				.sort((a, b) => {
+					const orderA = parseInt(
+						window
+							.getComputedStyle(a)
+							.getPropertyValue('order'),
+						10
+					)
+					const orderB = parseInt(
+						window
+							.getComputedStyle(b)
+							.getPropertyValue('order'),
+						10
+					)
+					return orderA - orderB
+				})
+
+			const correctBadges = suggestion.split(' ')
+			// debugger
+			console.log(badgeItems)
+			badges.forEach((el, i) => {
+				console.log(
+					el,
+					el.getAttr('value'),
+					correctBadges[i],
+					el.getAttr('value') === correctBadges[i]
+						? 'correct'
+						: 'wrong'
+				)
+				el.setAttr(
+					el.getAttr('value') === correctBadges[i]
+						? 'correct'
+						: 'wrong',
+					true
+				)
+			})
+		}
+
+		this.displayBottomPanel(form, {
+			checkCallback: (e) => {},
+			nextCallback: (e) => {
+				e.preventDefault()
+				this.renderBadges(el)
 			}
 		})
 	}
@@ -301,6 +455,7 @@ export default class Memo extends Plugin {
 
 					if (mode === 'card') this.renderCard(el)
 					else if (mode === 'list') this.renderList(el)
+					else if (mode === 'badges') this.renderBadges(el)
 				} catch (err) {
 					new Notice(err)
 					el.innerHTML = 'Parsing error: \n' + err
