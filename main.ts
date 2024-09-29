@@ -176,7 +176,6 @@ export default class Memo extends Plugin {
 					? 'block'
 					: 'none'
 		}
-		card.addEventListener('click', toggleCard)
 
 		el.appendChild(card)
 
@@ -184,6 +183,7 @@ export default class Memo extends Plugin {
 			checkCallback: (e: Event) => {
 				e.preventDefault()
 				toggleCard()
+				this.logResult()
 			},
 			nextCallback: (e: Event) => {
 				e.preventDefault()
@@ -246,7 +246,9 @@ export default class Memo extends Plugin {
 		}
 
 		this.displayBottomPanel(form, {
-			checkCallback: (e) => {},
+			checkCallback: (e) => {
+				this.logResult()
+			},
 			nextCallback: (e) => {
 				e.preventDefault()
 				this.renderList(el)
@@ -356,27 +358,23 @@ export default class Memo extends Plugin {
 
 		this.displayBottomPanel(form, {
 			checkCallback: async (e) => {
-				const tp = (this.app as any).plugins.plugins[
-					'templater-obsidian'
-				]?.templater.current_functions_object
-				if (tp) {
-					this._settings.logs.forEach((log) => {
-						if (this._associationFile?.file)
-							this.addMetadata(
-								this._associationFile.file,
-								log.key,
-								eval(log.value)
-							)
-					})
-				} else {
-					console.error(
-						'Templater плагин не установлен или не активен'
-					)
-				}
+				this.logResult()
 			},
 			nextCallback: (e) => {
 				e.preventDefault()
 				this.renderBadges(el)
+			}
+		})
+	}
+
+	logResult() {
+		this._settings.logs.forEach((log) => {
+			if (this._associationFile?.file) {
+				this.addMetadata(
+					this._associationFile.file,
+					log.key,
+					eval(log.value)
+				).then(() => this.getPages())
 			}
 		})
 	}
@@ -416,6 +414,23 @@ export default class Memo extends Plugin {
 		}
 
 		await this.app.vault.modify(file, newContent)
+	}
+
+	async getPages() {
+		const settings = this._settings
+		const p = await this._dv.pages(settings.fromQuery)
+		const pages: TItem[] = p.filter(
+			// @ts-ignore
+			(p) =>
+				eval(settings.associationKey.displayProperty)
+					.length &&
+				eval(settings.suggestion.displayProperty).length &&
+				(settings.filterPath
+					? eval(settings.filterPath)
+					: true)
+		)
+
+		this._pages = pages
 	}
 
 	async onload() {
@@ -468,6 +483,7 @@ export default class Memo extends Plugin {
 							`DisplayProperty for suggestion is required`
 						)
 
+					// eslint-disable-next-line
 					const p = await this._dv.pages(settings.fromQuery)
 					const allAssociations = new Set(
 						eval(settings.associationKey.displayProperty)
@@ -487,19 +503,7 @@ export default class Memo extends Plugin {
 							`Nothing found for ${settings.suggestion.displayProperty}`
 						)
 
-					const pages: TItem[] = p.filter(
-						// @ts-ignore
-						(p) =>
-							eval(settings.associationKey.displayProperty)
-								.length &&
-							eval(settings.suggestion.displayProperty)
-								.length &&
-							(settings.filterPath
-								? eval(settings.filterPath)
-								: true)
-					)
-
-					this._pages = pages
+					this.getPages()
 
 					const mode: TMode = settings.mode
 
