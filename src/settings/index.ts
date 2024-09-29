@@ -142,6 +142,8 @@ export class MemoSetting extends PluginSettingTab {
 				this.suggestionSettingsEl[id] = div.createDiv()
 			}
 
+			div.createEl('br')
+
 			new Setting(div)
 				.setName('FROM dataview query')
 				.setDesc(
@@ -191,6 +193,8 @@ export class MemoSetting extends PluginSettingTab {
 							this.renderList(list)
 						})
 				)
+
+			div.createEl('hr')
 			div.createEl('h1').innerHTML = 'Key'
 
 			new Setting(div)
@@ -211,6 +215,7 @@ export class MemoSetting extends PluginSettingTab {
 						})
 				)
 
+			div.createEl('hr')
 			div.createEl('h1').innerHTML = 'Suggestions'
 
 			new Setting(div)
@@ -233,6 +238,47 @@ export class MemoSetting extends PluginSettingTab {
 				settings.suggestion.additionalSettings,
 				settings.mode
 			)
+
+			div.createEl('br')
+			div.createEl('br')
+
+			new Setting(containerEl)
+				.setName('Logs')
+				.addButton((btn) => {
+					btn.setIcon('plus').onClick(() => {
+						memoSettings.settings.logs.push({
+							id: uuidv4(),
+							value: '',
+							type: 'metadata'
+						})
+						this.plugin.saveSettings()
+						this.display()
+					})
+				})
+
+			memoSettings.settings.logs.forEach((log) => {
+				new Setting(containerEl)
+					.addText((text) =>
+						text
+							.setValue(log.value)
+							.setPlaceholder('Type template for logging')
+							.onChange((value) => {
+								log.value = value
+								this.plugin.saveSettings()
+							})
+					)
+					.addButton((btn) => {
+						btn.setIcon('trash-2').onClick(() => {
+							memoSettings.settings.logs =
+								memoSettings.settings.logs.filter(
+									(item) => item.id !== log.id
+								)
+
+							this.plugin.saveSettings()
+							this.display()
+						})
+					})
+			})
 		})
 	}
 

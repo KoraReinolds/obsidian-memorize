@@ -30,7 +30,8 @@ export const DEFAULT_SETTINGS: TSettings = {
 			},
 			total: 4
 		}
-	}
+	},
+	logs: []
 }
 
 export type TRangeSettings = {
@@ -43,6 +44,12 @@ export type TRangeSettings = {
 
 export type TSuggestionSettings = TRangeSettings
 
+export type TLogSettings = {
+	type: 'metadata'
+	value: string
+	id: string
+}
+
 export type TSettings = {
 	fromQuery: string
 	mode: TMode
@@ -54,6 +61,7 @@ export type TSettings = {
 		displayProperty: string
 		additionalSettings: TSuggestionSettings
 	}
+	logs: TLogSettings[]
 }
 
 export type IMemoSettings = {
