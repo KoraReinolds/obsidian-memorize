@@ -248,6 +248,7 @@ export class MemoSetting extends PluginSettingTab {
 					btn.setIcon('plus').onClick(() => {
 						memoSettings.settings.logs.push({
 							id: uuidv4(),
+							key: '',
 							value: '',
 							type: 'metadata'
 						})
@@ -258,6 +259,15 @@ export class MemoSetting extends PluginSettingTab {
 
 			memoSettings.settings.logs.forEach((log) => {
 				new Setting(containerEl)
+					.addText((text) =>
+						text
+							.setValue(log.key)
+							.setPlaceholder('Type metadata key')
+							.onChange((value) => {
+								log.key = value
+								this.plugin.saveSettings()
+							})
+					)
 					.addText((text) =>
 						text
 							.setValue(log.value)

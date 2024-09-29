@@ -46,6 +46,7 @@ export type TSuggestionSettings = TRangeSettings
 
 export type TLogSettings = {
 	type: 'metadata'
+	key: string
 	value: string
 	id: string
 }

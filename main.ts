@@ -35,6 +35,7 @@ export default class Memo extends Plugin {
 	_dv: any
 	_pages: TItem[]
 	_associations: string[]
+	_associationFile: TItem | undefined
 	_suggestions: string[]
 	_unrelatedSuggestions: string[]
 
@@ -129,13 +130,21 @@ export default class Memo extends Plugin {
 		nextBtn.addEventListener('click', nextCallback)
 	}
 
-	renderCard(el: HTMLElement) {
+	getAssociation() {
 		const pages = this._pages
+
+		const page = getRandomItem(pages)
+
+		if (!page) throw new Error(`Nothing found for display`)
+		this._associationFile = page
+
+		return page
+	}
+
+	renderCard(el: HTMLElement) {
 		el.innerHTML = ''
-
-		const p = getRandomItem(pages)
-
-		if (!p) throw new Error(`Nothing found for display`)
+		// eslint-disable-next-line
+		const p = this.getAssociation()
 
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
@@ -184,12 +193,9 @@ export default class Memo extends Plugin {
 	}
 
 	renderList(el: HTMLElement) {
-		const pages = this._pages
 		el.innerHTML = ''
-
-		const p = getRandomItem(pages)
-
-		if (!p) throw new Error(`Nothing found for display`)
+		// eslint-disable-next-line
+		const p = this.getAssociation()
 
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
@@ -203,7 +209,7 @@ export default class Memo extends Plugin {
 
 		{
 			// eslint-disable-next-line
-			const p = pages
+			const p = this._pages
 			const allSuggestions = eval(
 				this._settings.suggestion.displayProperty
 			)
@@ -249,14 +255,9 @@ export default class Memo extends Plugin {
 	}
 
 	renderBadges(el: HTMLElement) {
-		console.log(this)
-
-		const pages = this._pages
 		el.innerHTML = ''
-
-		const p = getRandomItem(pages)
-
-		if (!p) throw new Error(`Nothing found for display`)
+		// eslint-disable-next-line
+		const p = this.getAssociation()
 
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
@@ -270,7 +271,7 @@ export default class Memo extends Plugin {
 
 		{
 			// eslint-disable-next-line
-			const p = pages
+			const p = this._pages
 			const allSuggestions = eval(
 				this._settings.suggestion.displayProperty
 			)
@@ -342,17 +343,8 @@ export default class Memo extends Plugin {
 				})
 
 			const correctBadges = suggestion.split(' ')
-			// debugger
-			console.log(badgeItems)
+
 			badges.forEach((el, i) => {
-				console.log(
-					el,
-					el.getAttr('value'),
-					correctBadges[i],
-					el.getAttr('value') === correctBadges[i]
-						? 'correct'
-						: 'wrong'
-				)
 				el.setAttr(
 					el.getAttr('value') === correctBadges[i]
 						? 'correct'
@@ -363,12 +355,67 @@ export default class Memo extends Plugin {
 		}
 
 		this.displayBottomPanel(form, {
-			checkCallback: (e) => {},
+			checkCallback: async (e) => {
+				const tp = (this.app as any).plugins.plugins[
+					'templater-obsidian'
+				]?.templater.current_functions_object
+				if (tp) {
+					this._settings.logs.forEach((log) => {
+						if (this._associationFile?.file)
+							this.addMetadata(
+								this._associationFile.file,
+								log.key,
+								eval(log.value)
+							)
+					})
+				} else {
+					console.error(
+						'Templater плагин не установлен или не активен'
+					)
+				}
+			},
 			nextCallback: (e) => {
 				e.preventDefault()
 				this.renderBadges(el)
 			}
 		})
+	}
+
+	async addMetadata(f: TFile, key: string, value: string) {
+		const file = await this.app.vault.getAbstractFileByPath(
+			f.path
+		)
+		if (!file || !(file instanceof TFile)) return
+
+		const fileContent = await this.app.vault.read(file)
+
+		const frontmatterRegex = /^---\n([\s\S]*?)\n---/
+		const match = frontmatterRegex.exec(fileContent)
+
+		let newContent
+
+		if (match) {
+			let frontmatter = match[1]
+
+			const keyRegex = new RegExp(`^${key}:.*`, 'm')
+			if (keyRegex.test(frontmatter)) {
+				frontmatter = frontmatter.replace(
+					keyRegex,
+					`${key}: "${value}"`
+				)
+			} else {
+				frontmatter += `\n${key}: "${value}"`
+			}
+
+			newContent = fileContent.replace(
+				match[0],
+				`---\n${frontmatter}\n---`
+			)
+		} else {
+			newContent = `---\n${key}: "${value}"\n---\n\n${fileContent}`
+		}
+
+		await this.app.vault.modify(file, newContent)
 	}
 
 	async onload() {
@@ -446,13 +493,17 @@ export default class Memo extends Plugin {
 							eval(settings.associationKey.displayProperty)
 								.length &&
 							eval(settings.suggestion.displayProperty)
-								.length
+								.length &&
+							(settings.filterPath
+								? eval(settings.filterPath)
+								: true)
 					)
 
 					this._pages = pages
 
 					const mode: TMode = settings.mode
 
+					console.log(this)
 					if (mode === 'card') this.renderCard(el)
 					else if (mode === 'list') this.renderList(el)
 					else if (mode === 'badges') this.renderBadges(el)
