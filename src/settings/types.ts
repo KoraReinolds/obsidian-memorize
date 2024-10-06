@@ -23,7 +23,9 @@ export const DEFAULT_SETTINGS: TSettings = {
 	},
 	suggestion: {
 		displayProperty: '',
+		displayType: 'text',
 		additionalSettings: {
+			scriptPath: '',
 			range: {
 				max: 2,
 				min: 1
@@ -42,7 +44,14 @@ export type TRangeSettings = {
 	total: number
 }
 
-export type TSuggestionSettings = TRangeSettings
+export type TScriptSettings = {
+	scriptPath: string
+}
+
+export type TSuggestionSettings = TRangeSettings &
+	TScriptSettings
+
+export type TDisplayType = 'text' | 'script'
 
 export type TLogSettings = {
 	type: 'metadata'
@@ -60,6 +69,7 @@ export type TSettings = {
 	}
 	suggestion: {
 		displayProperty: string
+		displayType: TDisplayType
 		additionalSettings: TSuggestionSettings
 	}
 	logs: TLogSettings[]

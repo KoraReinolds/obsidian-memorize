@@ -1,6 +1,7 @@
 import {
 	App,
 	Editor,
+	FileSystemAdapter,
 	MarkdownView,
 	Modal,
 	Notice,
@@ -164,9 +165,12 @@ export default class Memo extends Plugin {
 
 		const answersDiv = document.createElement('div')
 		answersDiv.className = 'memo-answers'
-		answersDiv.textContent = Array.isArray(suggestions)
-			? suggestions.join(', ')
-			: suggestions
+		this.displayValue(
+			answersDiv,
+			Array.isArray(suggestions)
+				? suggestions.join(', ')
+				: suggestions
+		)
 		card.appendChild(answersDiv)
 		answersDiv.style.display = 'none'
 
@@ -190,6 +194,44 @@ export default class Memo extends Plugin {
 				this.renderCard(el)
 			}
 		})
+	}
+
+	loadScriptFromVault = async (
+		app: App,
+		path: string
+	): Promise<string | null> => {
+		const adapter = app.vault.adapter as FileSystemAdapter
+
+		try {
+			const content = await adapter.read(path)
+			return content
+		} catch (error) {
+			console.error(
+				`Failed to load script from ${path}:`,
+				error
+			)
+			return null
+		}
+	}
+
+	async displayValue(
+		container: HTMLElement,
+		value: string
+	) {
+		const type = this._settings.suggestion.displayType
+		if (type === 'text') {
+			container.innerHTML = value
+		} else if (type === 'script') {
+			const scriptString = await this.loadScriptFromVault(
+				this.app,
+				this._settings.suggestion.additionalSettings
+					.scriptPath
+			)
+			if (scriptString) {
+				const f = eval(scriptString)
+				f(container, value)
+			}
+		}
 	}
 
 	renderList(el: HTMLElement) {
@@ -236,7 +278,7 @@ export default class Memo extends Plugin {
 			checkbox.type = 'checkbox'
 			checkbox.name = item.value
 			const label = li.createEl('label')
-			label.innerHTML = item.value
+			this.displayValue(label, item.value)
 			label.setAttr('for', id)
 		})
 
@@ -308,7 +350,7 @@ export default class Memo extends Plugin {
 			span.setAttr('value', item.value)
 			span.classList.add('memo-badge')
 
-			span.innerHTML = item.displayValue
+			this.displayValue(span, item.displayValue)
 		})
 		const div = container.createDiv()
 		div.classList.add('memo-divider')

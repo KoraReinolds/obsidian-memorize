@@ -2,6 +2,7 @@ import MemoPlugin from '../../main'
 import { App, PluginSettingTab, Setting } from 'obsidian'
 import {
 	DEFAULT_SETTINGS,
+	TDisplayType,
 	TSuggestionSettings,
 	type TMode,
 	type TSettings
@@ -229,6 +230,39 @@ export class MemoSetting extends PluginSettingTab {
 						.setPlaceholder('Type property')
 						.onChange(async (value) => {
 							settings.suggestion.displayProperty = value
+							this.plugin.saveSettings()
+						})
+				)
+
+			const suggestionDisplayType = new Setting(div)
+				.setName('Type of display')
+				.setDesc('Define how to display property')
+				.addDropdown((dd) =>
+					dd
+						.addOptions({
+							text: 'Text',
+							script: 'Script'
+						})
+						.setValue(settings.suggestion.displayType)
+						.onChange((value) => {
+							settings.suggestion.displayType =
+								value as TDisplayType
+							this.plugin.saveSettings()
+							this.renderList(list)
+						})
+				)
+
+			if (settings.suggestion.displayType === 'script')
+				suggestionDisplayType.addText((text) =>
+					text
+						.setValue(
+							settings.suggestion.additionalSettings
+								.scriptPath
+						)
+						.setPlaceholder('Type script path')
+						.onChange(async (value) => {
+							settings.suggestion.additionalSettings.scriptPath =
+								value
 							this.plugin.saveSettings()
 						})
 				)
