@@ -161,6 +161,18 @@ export class MemoSetting extends PluginSettingTab {
 				)
 
 			new Setting(div)
+				.setName('Accept callback script path')
+				.setDesc('')
+				.addText((text) =>
+					text
+						.setValue(settings.acceptCallback)
+						.onChange(async (value) => {
+							settings.acceptCallback = value
+							this.plugin.saveSettings()
+						})
+				)
+
+			new Setting(div)
 				.setName('Filter function')
 				.setDesc(
 					'Filters found files for a more specific selection (optional)'

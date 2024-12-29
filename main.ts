@@ -114,9 +114,11 @@ export default class Memo extends Plugin {
 		callbacks: {
 			checkCallback: (e: Event) => void
 			nextCallback: (e: Event) => void
+			acceptCallback: (e: Event) => void
 		}
 	) {
-		const { checkCallback, nextCallback } = callbacks
+		const { acceptCallback, checkCallback, nextCallback } =
+			callbacks
 		const panel = el.createDiv()
 		panel.className = 'memo-bottom-panel'
 
@@ -130,6 +132,11 @@ export default class Memo extends Plugin {
 		nextBtn.innerText = 'Next'
 		nextBtn.className = 'memo-button'
 		nextBtn.addEventListener('click', nextCallback)
+
+		const acceptBtn = panel.createEl('button')
+		acceptBtn.innerText = 'Accept'
+		acceptBtn.className = 'memo-button'
+		acceptBtn.addEventListener('click', acceptCallback)
 	}
 
 	getAssociation() {
@@ -146,7 +153,6 @@ export default class Memo extends Plugin {
 		el.innerHTML = ''
 		// eslint-disable-next-line
 		const p = this.getAssociation()
-		debugger
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
 		)
@@ -192,8 +198,27 @@ export default class Memo extends Plugin {
 			nextCallback: (e: Event) => {
 				e.preventDefault()
 				this.renderCard(el)
+			},
+			acceptCallback: async (e) => {
+				e.preventDefault()
+
+				this.acceptCallback()
 			}
 		})
+	}
+
+	async acceptCallback() {
+		const scriptPath = this._settings.acceptCallback
+		if (scriptPath) {
+			const scriptString = await this.loadScriptFromVault(
+				this.app,
+				scriptPath
+			)
+			if (scriptString) {
+				const f = eval(scriptString)
+				f(this._dv)
+			}
+		}
 	}
 
 	loadScriptFromVault = async (
@@ -294,6 +319,10 @@ export default class Memo extends Plugin {
 			nextCallback: (e) => {
 				e.preventDefault()
 				this.renderList(el)
+			},
+			acceptCallback: (e) => {
+				e.preventDefault()
+				this.acceptCallback()
 			}
 		})
 	}
@@ -405,6 +434,11 @@ export default class Memo extends Plugin {
 			nextCallback: (e) => {
 				e.preventDefault()
 				this.renderBadges(el)
+			},
+			acceptCallback: (e) => {
+				e.preventDefault()
+
+				this.acceptCallback()
 			}
 		})
 	}
@@ -563,7 +597,7 @@ export default class Memo extends Plugin {
 					//	throw new Error(
 					//		`Nothing found for ${settings.suggestion.displayProperty}`
 					//	)
-					debugger
+					//debugger
 					this.getPages()
 
 					const mode: TMode = settings.mode

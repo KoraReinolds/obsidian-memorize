@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: TSettings = {
 	fromQuery: '',
 	mode: 'card',
 	filterPath: '',
+	acceptCallback: '',
 	associationKey: {
 		displayProperty: 'p.file.name'
 	},
@@ -64,6 +65,7 @@ export type TSettings = {
 	fromQuery: string
 	mode: TMode
 	filterPath: string
+	acceptCallback: string
 	associationKey: {
 		displayProperty: string
 	}
