@@ -115,10 +115,12 @@ export default class Memo extends Plugin {
 			checkCallback: (e: Event) => void
 			nextCallback: (e: Event) => void
 			acceptCallback: (e: Event) => void
+			openAssociationFile?: (e: Event) => void
 		}
 	) {
 		const { acceptCallback, checkCallback, nextCallback } =
 			callbacks
+
 		const panel = el.createDiv()
 		panel.className = 'memo-bottom-panel'
 
@@ -137,6 +139,22 @@ export default class Memo extends Plugin {
 		acceptBtn.innerText = 'Accept'
 		acceptBtn.className = 'memo-button'
 		acceptBtn.addEventListener('click', acceptCallback)
+
+		const openBtn = panel.createEl('button')
+		openBtn.innerText = 'Open file'
+		openBtn.className = 'memo-button'
+		openBtn.addEventListener('click', async () => {
+			const filePath =
+				this._associationFile?.file.path || ''
+
+			const file =
+				this.app.vault.getAbstractFileByPath(filePath)
+
+			if (file && file instanceof TFile) {
+				const newLeaf = this.app.workspace.splitActiveLeaf()
+				await newLeaf.openFile(file)
+			}
+		})
 	}
 
 	getAssociation() {
