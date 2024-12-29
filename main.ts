@@ -9,6 +9,7 @@ import {
 	TFile
 } from 'obsidian'
 import {
+	getFileContent,
 	getRandomItem,
 	getRandomValueBetween,
 	toArray
@@ -133,7 +134,6 @@ export default class Memo extends Plugin {
 
 	getAssociation() {
 		const pages = this._pages
-
 		const page = getRandomItem(pages)
 
 		if (!page) throw new Error(`Nothing found for display`)
@@ -146,7 +146,7 @@ export default class Memo extends Plugin {
 		el.innerHTML = ''
 		// eslint-disable-next-line
 		const p = this.getAssociation()
-
+		debugger
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
 		)
@@ -461,17 +461,36 @@ export default class Memo extends Plugin {
 	async getPages() {
 		const settings = this._settings
 		const p = await this._dv.pages(settings.fromQuery)
+
+		for (const page of p) {
+			page.file.content = await getFileContent(
+				this.app,
+				page.file.path
+			)
+		}
+
 		const pages: TItem[] = p.filter(
 			// @ts-ignore
-			(p) =>
-				eval(settings.associationKey.displayProperty)
-					.length &&
-				eval(settings.suggestion.displayProperty).length &&
-				(settings.filterPath
-					? eval(settings.filterPath)
-					: true)
-		)
+			(p) => {
+				const associationSize = eval(
+					settings.associationKey.displayProperty
+				).length
 
+				const suggestionSize = eval(
+					settings.suggestion.displayProperty
+				).length
+
+				const additionalFiltered = settings.filterPath
+					? eval(settings.filterPath)
+					: true
+
+				return (
+					associationSize &&
+					suggestionSize &&
+					additionalFiltered
+				)
+			}
+		)
 		this._pages = pages
 	}
 
@@ -536,15 +555,15 @@ export default class Memo extends Plugin {
 							`Nothing found for ${settings.associationKey.displayProperty}`
 						)
 
-					const allSuggestions = new Set(
-						eval(settings.suggestion.displayProperty)
-					)
-
-					if (!allSuggestions.size)
-						throw new Error(
-							`Nothing found for ${settings.suggestion.displayProperty}`
-						)
-
+					//const allSuggestions = new Set(
+					//	eval(settings.suggestion.displayProperty)
+					//)
+					//
+					//if (!allSuggestions.size)
+					//	throw new Error(
+					//		`Nothing found for ${settings.suggestion.displayProperty}`
+					//	)
+					debugger
 					this.getPages()
 
 					const mode: TMode = settings.mode
@@ -573,8 +592,8 @@ export default class Memo extends Plugin {
 		ribbonIconEl.addClass('my-plugin-ribbon-class')
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem()
-		statusBarItemEl.setText('Status Bar Text')
+		//const statusBarItemEl = this.addStatusBarItem()
+		//statusBarItemEl.setText('Status Bar Text')
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({

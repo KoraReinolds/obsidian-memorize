@@ -1,88 +1,97 @@
 .memo-card {
-  background-color: #3a3f47;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 15px;
-  cursor: pointer;
-  width: 220px;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	background-color: #3a3f47;
+	border-radius: 8px;
+	padding: 15px;
+	cursor: pointer;
+	width: 100%;
+	text-align: center;
+	transition:
+		transform 0.2s,
+		box-shadow 0.2s;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .memo-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
 }
 
 .memo-answers {
-  display: none;
-  margin-top: 10px;
-  font-weight: bold;
-  color: #61dafb;
+	display: none;
+	margin-top: 10px;
+	font-weight: bold;
+	color: #61dafb;
 }
 
 .memo-bottom-panel {
-  display: flex;
-  justify-content: center;
-  width: 220px;
-  margin: 15px;
-  padding: 15px;
-  border-top: 1px solid #444;
+	display: flex;
+	justify-content: start;
+	width: 100%;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	padding: 15px;
+	border-top: 1px solid #444;
 }
 
 .memo-bottom-panel .memo-button {
-  background-color: #61dafb;
-  border: none;
-  border-radius: 5px;
-  color: #282c34;
-  padding: 10px 20px;
-  margin: 0 10px;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
-  font-size: 16px;
-  font-weight: bold;
+	background-color: #61dafb;
+	border: none;
+	border-radius: 5px;
+	color: #282c34;
+	padding: 10px 20px;
+	margin: 0 10px;
+	cursor: pointer;
+	transition:
+		background-color 0.2s,
+		transform 0.2s;
+	font-size: 16px;
+	font-weight: bold;
 }
 
 .memo-bottom-panel .memo-button:hover {
-  background-color: #4db3e5;
-  transform: translateY(-1px);
+	background-color: #4db3e5;
+	transform: translateY(-1px);
 }
 
-.block-language-memo form[submitted=true] li[correct=true] input[type=checkbox] {
-  background: #4db3e5;
+.block-language-memo
+	form[submitted='true']
+	li[correct='true']
+	input[type='checkbox'] {
+	background: #4db3e5;
 }
 
 .memo-badge {
-  cursor: pointer;
-  background-color: #282c34;
-  border-radius: 12px;
-  padding: 5px 10px;
-  font-size: 14px;
-  font-weight: bold;
-  display: inline-block;
-  margin: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.2s, transform 0.4s ease;
+	cursor: pointer;
+	background-color: #282c34;
+	border-radius: 12px;
+	padding: 5px 10px;
+	font-size: 14px;
+	font-weight: bold;
+	display: inline-block;
+	margin: 5px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	transition:
+		background-color 0.2s,
+		transform 0.4s ease;
 }
 
 .memo-badge:hover {
-  background-color: #4db3e5;
-  color: #282c34;
-  transform: translateY(-2px);
+	background-color: #4db3e5;
+	color: #282c34;
+	transform: translateY(-2px);
 }
 
 .memo-badge-container {
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 300px;
+	display: flex;
+	flex-wrap: wrap;
+	max-width: 100%;
 }
 
-.memo-badge[style*="order"] {
-  background-color: #61dafb;
-  color: #000;
-  font-weight: bold;
-  transform: translateY(-3px);
+.memo-badge[style*='order'] {
+	background-color: #61dafb;
+	color: #000;
+	font-weight: bold;
+	transform: translateY(-3px);
 }
 
 /* .memo-badge[correct] {
@@ -93,29 +102,30 @@
 } */
 
 .memo-badge[wrong] {
-  background-color: #282c34;
-  color: white;
-  font-weight: bold;
-  border: 2px solid #282c34;
+	background-color: #282c34;
+	color: white;
+	font-weight: bold;
+	border: 2px solid #282c34;
 }
 
 .memo-divider {
-  width: 100%;
-  height: 1px;
-  margin: 20px 0;
-  clear: both;
-  padding: 0 15px;
+	width: 100%;
+	height: 1px;
+	margin: 20px 0;
+	clear: both;
+	padding: 0 15px;
 }
 
 .memo-divider div {
-  width: 220px;
-  border-top: 1px solid #444;
+	width: 100%;
+	border-top: 1px solid #444;
 }
 
-.memo-badge-container:has(.memo-badge[style*="order"]) .memo-divider {
-  display: block;
+.memo-badge-container:has(.memo-badge[style*='order'])
+	.memo-divider {
+	display: block;
 }
 
 .memo-badge-container .memo-divider {
-  display: none;
+	display: none;
 }

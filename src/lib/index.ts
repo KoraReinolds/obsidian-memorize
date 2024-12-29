@@ -1,3 +1,5 @@
+import { App, TFile } from 'obsidian'
+
 export const getRandomValueBetween = (
 	min: number,
 	max: number
@@ -28,4 +30,20 @@ export const toArray = (input: any) => {
 			'Input is a complex value and cannot be converted to an array'
 		)
 	}
+}
+
+export const getFileContent = async (
+	app: App,
+	path: string
+) => {
+	const file = app.vault.getAbstractFileByPath(path)
+	if (file && file instanceof TFile) {
+		const content = await app.vault.read(file)
+		const contentWithoutMeta = content.replace(
+			/^---\n[\s\S]*?\n---\n/,
+			''
+		)
+		return contentWithoutMeta.trim()
+	}
+	return null
 }
