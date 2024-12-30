@@ -1,3 +1,4 @@
+import { debug } from 'console'
 import {
 	App,
 	Editor,
@@ -115,7 +116,6 @@ export default class Memo extends Plugin {
 			checkCallback: (e: Event) => void
 			nextCallback: (e: Event) => void
 			acceptCallback: (e: Event) => void
-			openAssociationFile?: (e: Event) => void
 		}
 	) {
 		const { acceptCallback, checkCallback, nextCallback } =
@@ -131,7 +131,8 @@ export default class Memo extends Plugin {
 		checkBtn.addEventListener('click', checkCallback)
 
 		const nextBtn = panel.createEl('button')
-		nextBtn.innerText = 'Next'
+		console.log(this)
+		nextBtn.innerText = `Next (${this._pages.length})`
 		nextBtn.className = 'memo-button'
 		nextBtn.addEventListener('click', nextCallback)
 
@@ -157,7 +158,8 @@ export default class Memo extends Plugin {
 		})
 	}
 
-	getAssociation() {
+	async getAssociation() {
+		await this.getPages()
 		const pages = this._pages
 		const page = getRandomItem(pages)
 
@@ -167,10 +169,10 @@ export default class Memo extends Plugin {
 		return page
 	}
 
-	renderCard(el: HTMLElement) {
+	async renderCard(el: HTMLElement) {
 		el.innerHTML = ''
 		// eslint-disable-next-line
-		const p = this.getAssociation()
+		const p = await this.getAssociation()
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
 		)
@@ -234,7 +236,7 @@ export default class Memo extends Plugin {
 			)
 			if (scriptString) {
 				const f = eval(scriptString)
-				f(this._dv)
+				f(this._dv, this._associationFile?.file.path)
 			}
 		}
 	}
@@ -277,10 +279,10 @@ export default class Memo extends Plugin {
 		}
 	}
 
-	renderList(el: HTMLElement) {
+	async renderList(el: HTMLElement) {
 		el.innerHTML = ''
 		// eslint-disable-next-line
-		const p = this.getAssociation()
+		const p = await this.getAssociation()
 
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
@@ -345,10 +347,10 @@ export default class Memo extends Plugin {
 		})
 	}
 
-	renderBadges(el: HTMLElement) {
+	async renderBadges(el: HTMLElement) {
 		el.innerHTML = ''
 		// eslint-disable-next-line
-		const p = this.getAssociation()
+		const p = await this.getAssociation()
 
 		const associations = toArray(
 			eval(this._settings.associationKey.displayProperty)
@@ -544,6 +546,7 @@ export default class Memo extends Plugin {
 			}
 		)
 		this._pages = pages
+		return pages
 	}
 
 	async onload() {
@@ -616,14 +619,16 @@ export default class Memo extends Plugin {
 					//		`Nothing found for ${settings.suggestion.displayProperty}`
 					//	)
 					//debugger
-					this.getPages()
+					await this.getPages()
 
 					const mode: TMode = settings.mode
 
 					console.log(this)
-					if (mode === 'card') this.renderCard(el)
-					else if (mode === 'list') this.renderList(el)
-					else if (mode === 'badges') this.renderBadges(el)
+					if (mode === 'card') await this.renderCard(el)
+					else if (mode === 'list')
+						await this.renderList(el)
+					else if (mode === 'badges')
+						await this.renderBadges(el)
 				} catch (err) {
 					new Notice(err)
 					el.innerHTML = 'Parsing error: \n' + err
